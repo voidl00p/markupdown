@@ -40,7 +40,7 @@ def index(
 
             # Calculate relative URL from staging directory
             rel_path = os.path.relpath(file_path, staging_dir)
-            url = "/" + os.path.splitext(rel_path)[0]  # Remove .md extension
+            url = os.path.splitext(rel_path)[0]  # Remove .md extension
 
             # Create markdown link
             index_links.append(f"- [{title}]({url})")

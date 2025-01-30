@@ -3,9 +3,29 @@ from pathlib import Path
 import frontmatter
 import mistune
 from liquid import Environment, FileSystemLoader
+from urllib.parse import urlparse
+
+
+class LinkRenderer(mistune.HTMLRenderer):
+    def __init__(self, site_root: str = ".", **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.site_root = site_root
+
+    def link(self, text, url, title=None):
+        """
+        Make sure the URL is absolute by prefixing it with the site root.
+        Don't prefix the root if the URL has a scheme (e.g. http, https, ftp, mailto, etc.).
+        """
+        parsed_url = urlparse(url)
+        if parsed_url.scheme:
+            prefixed_url = url  # Already an absolute or external URL
+        else:
+            prefixed_url = f"{self.site_root.rstrip('/')}/{url.lstrip('/')}"
+        return super().link(text, prefixed_url, title)
 
 
 def render(
+    site_root: str = ".",
     staging_dir: Path | str = Path("build/staging"),
     site_dir: Path | str = Path("build/site"),
     template_dir: Path | str = Path("templates"),
@@ -15,6 +35,7 @@ def render(
     Render staged markdown files using liquid templates.
 
     Args:
+        site_root: Root URL of the site. Defaults to ".".
         staging_dir: Directory containing staged markdown files. Defaults to "build/staging"
         site_dir: Directory to output rendered files. Defaults to "build/site"
         template_dir: Directory containing liquid templates. Defaults to "templates"
@@ -52,7 +73,12 @@ def render(
             page = frontmatter.load(f)
 
         # Convert markdown to HTML
-        html_content = mistune.html(page.content)
+        format_markdown = mistune.create_markdown(
+                escape=False,
+    plugins=['strikethrough', 'footnotes', 'table', 'speedup'],
+
+            renderer=LinkRenderer(site_root=site_root))
+        html_content = format_markdown(page.content)
 
         # Get template name from frontmatter or use default
         layout_template = str(page.metadata.get("layout", default_layout))
