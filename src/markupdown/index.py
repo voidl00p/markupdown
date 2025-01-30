@@ -4,6 +4,58 @@ from pathlib import Path
 import frontmatter
 
 
+def _handle_file(file_path: Path, staging_dir: Path) -> dict:
+    """
+    Process a single markdown file and return its index entry.
+
+    Args:
+        file_path: Path to the markdown file
+        staging_dir: Path to the staging directory
+
+    Returns:
+        dict: Index entry containing title and url
+    """
+    # Read the markdown file's frontmatter
+    with open(file_path, "r", encoding="utf-8") as f:
+        post = frontmatter.load(f)
+
+    # Get the title from frontmatter, fallback to filename without extension
+    title = post.get("title", file_path.stem)
+
+    # Calculate relative URL from staging directory
+    rel_path = os.path.relpath(file_path, staging_dir)
+    path = "/" + os.path.splitext(rel_path)[0]  # Remove .md extension
+
+    return {"title": title, "path": path}
+
+
+def _handle_directory(dir_path: Path, staging_dir: Path) -> dict | None:
+    """
+    Process a directory containing index.md and return its index entry.
+
+    Args:
+        dir_path: Path to the directory
+        staging_dir: Path to the staging directory
+
+    Returns:
+        dict | None: Index entry containing title and url if index.md exists, None otherwise
+    """
+    index_path = dir_path / "index.md"
+    if not index_path.exists():
+        return None
+
+    # Calculate relative URL from staging directory
+    rel_path = "/" + os.path.relpath(dir_path, staging_dir)
+
+    # Get the title from the index.md frontmatter
+    with open(index_path, "r", encoding="utf-8") as f:
+        index_post = frontmatter.load(f)
+
+    # Get the child folder name
+    title = index_post.get("title", dir_path.name)
+    return {"title": title, "path": rel_path}
+
+
 def index(
     staging_dir: Path | str = Path("build/staging"),
 ) -> None:
@@ -18,48 +70,29 @@ def index(
     staging_dir = Path(staging_dir)
 
     for root, _, files in os.walk(staging_dir):
+        root_path = Path(root)
+
         # Skip if there's no index.md in this directory
         if "index.md" not in files:
             continue
 
-        index_path = os.path.join(root, "index.md")
+        index_path = root_path / "index.md"
         index_links = []
 
         # Get all markdown files in the current directory except index.md
         md_files = [f for f in files if f.endswith(".md") and f != "index.md"]
 
-        # Get subdirectories in the current directory that contain index.md
+        # Process subdirectories that contain index.md
         for name in os.listdir(root):
-            subdir_path = os.path.join(root, name)
-            if os.path.isdir(subdir_path):
-                if "index.md" in os.listdir(subdir_path):
-                    # Calculate relative URL from staging directory
-                    rel_path = os.path.relpath(subdir_path, staging_dir)
-                    # Get the title from the index.md frontmatter
-                    with open(
-                        os.path.join(subdir_path, "index.md"), "r", encoding="utf-8"
-                    ) as f:
-                        index_post = frontmatter.load(f)
-                    # Get the child folder name
-                    title = index_post.get("title", os.path.basename(subdir_path))
-                    index_links.append({"title": title, "url": rel_path})
+            subdir_path = root_path / name
+            if subdir_path.is_dir():
+                if dir_entry := _handle_directory(subdir_path, staging_dir):
+                    index_links.append(dir_entry)
 
+        # Process markdown files
         for md_file in md_files:
-            file_path = os.path.join(root, md_file)
-
-            # Read the markdown file's frontmatter
-            with open(file_path, "r", encoding="utf-8") as f:
-                post = frontmatter.load(f)
-
-            # Get the title from frontmatter, fallback to filename without extension
-            title = post.get("title", os.path.splitext(md_file)[0])
-
-            # Calculate relative URL from staging directory
-            rel_path = os.path.relpath(file_path, staging_dir)
-            url = os.path.splitext(rel_path)[0]  # Remove .md extension
-
-            # Create markdown link
-            index_links.append({"title": title, "url": url})
+            file_entry = _handle_file(root_path / md_file, staging_dir)
+            index_links.append(file_entry)
 
         # Read the index.md file
         with open(index_path, "r", encoding="utf-8") as f:
