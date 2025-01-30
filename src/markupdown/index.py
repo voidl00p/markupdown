@@ -6,7 +6,7 @@ def index(
     staging_dir: Path | str = Path("build/staging"),
 ) -> None:
     """
-    Add entries frontmatter to index.md files in the staging directory.
+    Add index frontmatter to index.md files in the staging directory.
     Each entry will contain title and url information for the pages in that directory.
 
     Args:
@@ -42,15 +42,15 @@ def index(
             
             entries.append({
                 "title": title,
-                "url": url
+                "path": url
             })
 
         # Update the index.md file with the new entries
         with open(index_path, "r", encoding="utf-8") as f:
             index_post = frontmatter.load(f)
         
-        # Add or update the entries field
-        index_post["entries"] = entries
+        # Add or update the index field
+        index_post["index"] = entries
         
         # Write back to the file
         with open(index_path, "w", encoding="utf-8") as f:
