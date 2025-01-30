@@ -15,6 +15,7 @@ markupdown comes with the following add-on modules:
 - backref: Generates backreference frontmatter
 - changelog: Generates changelog frontmatter
 - images: Processes images
+- index: Generates index frontmatter for index.md files
 - lint: Checks all markdown files for syntax, grammar, readability, and style.
 - minify: Minifies CSS, JS, and HTML
 - og: Generates Open Graph frontmatter
@@ -60,10 +61,15 @@ Suppose you have a directory structure like this:
 ├── img
 │   └── image.png
 ├── pages
-│   ├── page1.md
-│   └── page2.md
+│   ├── index.md
+│   └── blog
+│       ├── index.md
+│       ├── post1.md
+│       └── post2.md
 ├── templates
-│   └── page.html
+│   ├── index.liquid
+│   ├── home.liquid
+│   └── blog.liquid
 └── build.py
 ```
 
@@ -72,10 +78,11 @@ Suppose you have a directory structure like this:
 ```python
 import markupdown
 
-# Stage the `page` markdown files
+# Stage the `pages` markdown files
 markupdown.stage()
 
 # Transform the frontmatter in the staged markdown files
+markupdown.index()
 markupdown.changelog()
 markupdown.backref()
 markupdown.related()
