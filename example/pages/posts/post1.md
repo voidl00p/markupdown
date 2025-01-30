@@ -1,9 +1,9 @@
 ---
 title: First Blog Post
-layout: blog
+layout: posts
 date: 2025-01-30
 ---
 
 # My First Blog Post
 
-This is an example blog post using markupdown.
+This is an example post using markupdown.

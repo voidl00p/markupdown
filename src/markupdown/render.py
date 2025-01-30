@@ -10,7 +10,7 @@ def render(
     staging_dir: Path | str = Path("build/staging"),
     site_dir: Path | str = Path("build/site"),
     template_dir: Path | str = Path("templates"),
-    default_template: str = "blog.liquid",
+    default_template: str = "posts.liquid",
 ) -> None:
     """
     Render staged markdown files using liquid templates.
@@ -19,7 +19,7 @@ def render(
         staging_dir: Directory containing staged markdown files. Defaults to "build/staging"
         site_dir: Directory to output rendered files. Defaults to "build/site"
         template_dir: Directory containing liquid templates. Defaults to "templates"
-        default_template: Default liquid template to use. Defaults to "blog.liquid"
+        default_template: Default liquid template to use. Defaults to "posts.liquid"
 
     Raises:
         FileNotFoundError: If template directory doesn't exist

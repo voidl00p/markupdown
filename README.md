@@ -68,14 +68,14 @@ This will bootstrap the project with a directory structure like this:
 │   └── image.png
 ├── pages
 │   ├── index.md
-│   └── blog
+│   └── posts
 │       ├── index.md
 │       ├── post1.md
 │       └── post2.md
 ├── templates
 │   ├── index.liquid
 │   ├── home.liquid
-│   └── blog.liquid
+│   └── posts.liquid
 └── build.py
 ```
 

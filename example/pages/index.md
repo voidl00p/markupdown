@@ -9,4 +9,4 @@ This is the homepage of my static site generated with markupdown.
 
 ## Recent Posts
 
-Check out my latest blog posts below.
+Check out my latest posts below.
