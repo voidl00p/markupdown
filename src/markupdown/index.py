@@ -28,6 +28,23 @@ def index(
         # Get all markdown files in the current directory except index.md
         md_files = [f for f in files if f.endswith(".md") and f != "index.md"]
 
+        # Get subdirectories in the current directory that contain index.md
+        subdirs = []
+        for name in os.listdir(root):
+            subdir_path = os.path.join(root, name)
+            if os.path.isdir(subdir_path):
+                if "index.md" in os.listdir(subdir_path):
+                    # Calculate relative URL from staging directory
+                    rel_path = os.path.relpath(subdir_path, staging_dir)
+                    # Get the title from the index.md frontmatter
+                    with open(
+                        os.path.join(subdir_path, "index.md"), "r", encoding="utf-8"
+                    ) as f:
+                        index_post = frontmatter.load(f)
+                    # Get the child folder name
+                    title = index_post.get("title", os.path.basename(subdir_path))
+                    subdirs.append(f"- [{title}]({rel_path})")
+
         for md_file in md_files:
             file_path = os.path.join(root, md_file)
 
@@ -50,9 +67,13 @@ def index(
             index_post = frontmatter.load(f)
 
         # Add index links to the end of the content if there are any
-        if index_links:
+        if index_links or subdirs:
             content = index_post.content.rstrip()  # Remove trailing whitespace
-            content += "\n\n## Index\n" + "\n".join(index_links) + "\n"
+            content += "\n\n## Index\n"
+            if subdirs:
+                content += "### Directories\n" + "\n".join(subdirs) + "\n"
+            if index_links:
+                content += "\n### Files\n" + "\n".join(index_links) + "\n"
             index_post.content = content
 
         # Write back to the file

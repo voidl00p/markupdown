@@ -47,8 +47,6 @@ def render(
     staging_dir = Path(staging_dir)
     site_dir = Path(site_dir)
     template_dir = Path(template_dir)
-    # This isn't working. Fix it so it appends build/site
-    base_url = str(base_url) if base_url else f"file://{os.getcwd()}/build/site/"
 
     # Ensure required directories exist
     staging_dir.mkdir(parents=True, exist_ok=True)
