@@ -8,7 +8,7 @@ def render(
     staging_dir: Path | str = Path("build/staging"),
     site_dir: Path | str = Path("build/site"),
     template_dir: Path | str = Path("templates"),
-    default_template: str = "post.liquid",
+    default_layout: str = "layout.liquid",
 ) -> None:
     """
     Render staged markdown files using liquid templates.
@@ -54,7 +54,8 @@ def render(
         html_content = markdown.markdown(content)
 
         # Get template name from frontmatter or use default
-        template_name = default_template  # You might want to extract this from frontmatter
+        # TODO: Extract this from frontmatter if it's set
+        template_name = default_layout
 
         # Render template with content
         template = env.get_template(template_name)
