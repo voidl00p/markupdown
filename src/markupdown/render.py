@@ -1,8 +1,8 @@
 from pathlib import Path
 
 import frontmatter
-from liquid import Environment, FileSystemLoader
 import mistune
+from liquid import Environment, FileSystemLoader
 
 
 def render(

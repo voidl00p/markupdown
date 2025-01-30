@@ -1,6 +1,8 @@
 import os
-import frontmatter
 from pathlib import Path
+
+import frontmatter
+
 
 def index(
     staging_dir: Path | str = Path("build/staging"),
@@ -25,34 +27,34 @@ def index(
 
         # Get all markdown files in the current directory except index.md
         md_files = [f for f in files if f.endswith(".md") and f != "index.md"]
-        
+
         for md_file in md_files:
             file_path = os.path.join(root, md_file)
-            
+
             # Read the markdown file's frontmatter
             with open(file_path, "r", encoding="utf-8") as f:
                 post = frontmatter.load(f)
-            
+
             # Get the title from frontmatter, fallback to filename without extension
             title = post.get("title", os.path.splitext(md_file)[0])
-            
+
             # Calculate relative URL from staging directory
             rel_path = os.path.relpath(file_path, staging_dir)
             url = "/" + os.path.splitext(rel_path)[0]  # Remove .md extension
-            
+
             # Create markdown link
             index_links.append(f"- [{title}]({url})")
 
         # Read the index.md file
         with open(index_path, "r", encoding="utf-8") as f:
             index_post = frontmatter.load(f)
-        
+
         # Add index links to the end of the content if there are any
         if index_links:
             content = index_post.content.rstrip()  # Remove trailing whitespace
             content += "\n\n## Index\n" + "\n".join(index_links) + "\n"
             index_post.content = content
-        
+
         # Write back to the file
         with open(index_path, "w", encoding="utf-8") as f:
             f.write(frontmatter.dumps(index_post))
