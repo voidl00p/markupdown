@@ -49,7 +49,13 @@ pip install markupdown[all]
 
 ## Usage
 
-Suppose you have a directory structure like this:
+From your project's root directory, run:
+
+```bash
+$ python -c"import markupdown; markupdown.init()"
+```
+
+This will bootstrap the project with a directory structure like this:
 
 ```
 .
@@ -73,7 +79,7 @@ Suppose you have a directory structure like this:
 └── build.py
 ```
 
-`build.py` could contain the following code:
+`build.py` will contain the following code:
 
 ```python
 import markupdown
