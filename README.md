@@ -81,6 +81,7 @@ markupdown.backref()
 markupdown.related()
 
 # Generate static site
+markupdown.images()
 markupdown.render()
 markupdown.sitemap()
 markupdown.rss()
