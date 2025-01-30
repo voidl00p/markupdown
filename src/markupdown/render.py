@@ -34,7 +34,7 @@ def render(
     staging_dir: Path | str = Path("build/staging"),
     site_dir: Path | str = Path("build/site"),
     template_dir: Path | str = Path("templates"),
-    default_layout: str = "layout.liquid",
+    default_template: str = "page.liquid",
 ) -> None:
     """
     Render staged markdown files using liquid templates.
@@ -44,7 +44,7 @@ def render(
         staging_dir: Directory containing staged markdown files. Defaults to "build/staging"
         site_dir: Directory to output rendered files. Defaults to "build/site"
         template_dir: Directory containing liquid templates. Defaults to "templates"
-        default_layout: Default liquid template to use. Defaults to "layout.liquid"
+        default_page: Default liquid template to use for each page. Defaults to "page.liquid"
 
     Raises:
         FileNotFoundError: If template directory doesn't exist
@@ -86,20 +86,20 @@ def render(
         html_content = format_markdown(page.content)
 
         # Get template name from frontmatter or use default
-        layout_template = str(page.metadata.get("layout", default_layout))
+        default_template = str(page.metadata.get("template", default_template))
 
         # Ensure the template ends with ".liquid"
-        if not layout_template.endswith(".liquid"):
-            layout_template += ".liquid"
+        if not default_template.endswith(".liquid"):
+            default_template += ".liquid"
 
         site_metadata = {"base_url": base_url}
 
         # Render template with content and frontmatter variables
-        layout_template = env.get_template(layout_template)
-        rendered = layout_template.render(
+        page_template = env.get_template(default_template)
+        rendered = page_template.render(
             content=html_content,
             site=site_metadata,
-            **page.metadata,
+            page=page.metadata,
         )
 
         # Write rendered content to file
