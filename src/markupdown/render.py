@@ -1,31 +1,29 @@
+import os
 from pathlib import Path
+from typing import Any
+from urllib.parse import urlparse
 
 import frontmatter
 import mistune
 from liquid import Environment, FileSystemLoader
-from urllib.parse import urlparse
 
 
 class LinkRenderer(mistune.HTMLRenderer):
-    def __init__(self, site_root: str = ".", **kwargs) -> None:
-        super().__init__(**kwargs)
-        self.site_root = site_root
-
     def link(self, text, url, title=None):
         """
-        Make sure the URL is absolute by prefixing it with the site root.
-        Don't prefix the root if the URL has a scheme (e.g. http, https, ftp, mailto, etc.).
+        If the URL is relative, append ".html" to it.
         """
+
         parsed_url = urlparse(url)
-        if parsed_url.scheme:
-            prefixed_url = url  # Already an absolute or external URL
-        else:
-            prefixed_url = f"{self.site_root.rstrip('/')}/{url.lstrip('/')}"
-        return super().link(text, prefixed_url, title)
+        if not parsed_url.scheme:
+            url = url.strip(".md")
+            url = url.strip("/")
+            url += ".html"
+        return super().link(text, url, title)
 
 
 def render(
-    site_root: str = ".",
+    base_url: str | None = None,
     staging_dir: Path | str = Path("build/staging"),
     site_dir: Path | str = Path("build/site"),
     template_dir: Path | str = Path("templates"),
@@ -49,6 +47,8 @@ def render(
     staging_dir = Path(staging_dir)
     site_dir = Path(site_dir)
     template_dir = Path(template_dir)
+    # This isn't working. Fix it so it appends build/site
+    base_url = str(base_url) if base_url else f"file://{os.getcwd()}/build/site/"
 
     # Ensure required directories exist
     staging_dir.mkdir(parents=True, exist_ok=True)
@@ -74,10 +74,10 @@ def render(
 
         # Convert markdown to HTML
         format_markdown = mistune.create_markdown(
-                escape=False,
-    plugins=['strikethrough', 'footnotes', 'table', 'speedup'],
-
-            renderer=LinkRenderer(site_root=site_root))
+            escape=False,
+            plugins=["strikethrough", "footnotes", "table", "speedup"],
+            renderer=LinkRenderer(),
+        )
         html_content = format_markdown(page.content)
 
         # Get template name from frontmatter or use default
@@ -87,9 +87,15 @@ def render(
         if not layout_template.endswith(".liquid"):
             layout_template += ".liquid"
 
+        site_metadata = {"base_url": base_url}
+
         # Render template with content and frontmatter variables
         layout_template = env.get_template(layout_template)
-        rendered = layout_template.render(content=html_content, **page.metadata)
+        rendered = layout_template.render(
+            content=html_content,
+            site=site_metadata,
+            **page.metadata,
+        )
 
         # Write rendered content to file
         with open(target_file, "w", encoding="utf-8") as f:
