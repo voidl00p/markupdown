@@ -1,6 +1,5 @@
 ---
 title: First Blog Post
-layout: posts
 created_at: 2025-01-30
 ---
 

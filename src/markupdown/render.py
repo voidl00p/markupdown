@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import frontmatter
 from liquid import Environment, FileSystemLoader
 import markdown
 
@@ -17,7 +18,7 @@ def render(
         staging_dir: Directory containing staged markdown files. Defaults to "build/staging"
         site_dir: Directory to output rendered files. Defaults to "build/site"
         template_dir: Directory containing liquid templates. Defaults to "templates"
-        default_template: Default liquid template to use. Defaults to "posts.liquid"
+        default_layout: Default liquid template to use. Defaults to "layout.liquid"
 
     Raises:
         FileNotFoundError: If template directory doesn't exist
@@ -48,18 +49,17 @@ def render(
 
         # Read markdown content and parse frontmatter
         with open(source_file, "r", encoding="utf-8") as f:
-            content = f.read()
+            page = frontmatter.load(f)
 
         # Convert markdown to HTML
-        html_content = markdown.markdown(content)
+        html_content = markdown.markdown(page.content)
 
         # Get template name from frontmatter or use default
-        # TODO: Extract this from frontmatter if it's set
-        template_name = default_layout
+        template_name = str(page.metadata.get("layout", default_layout))
 
-        # Render template with content
+        # Render template with content and frontmatter variables
         template = env.get_template(template_name)
-        rendered = template.render(content=html_content)
+        rendered = template.render(content=html_content, **page.metadata)
 
         # Write rendered content to file
         with open(target_file, "w", encoding="utf-8") as f:
