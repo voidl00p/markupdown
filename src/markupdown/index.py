@@ -29,7 +29,6 @@ def index(
         md_files = [f for f in files if f.endswith(".md") and f != "index.md"]
 
         # Get subdirectories in the current directory that contain index.md
-        subdirs = []
         for name in os.listdir(root):
             subdir_path = os.path.join(root, name)
             if os.path.isdir(subdir_path):
@@ -43,7 +42,7 @@ def index(
                         index_post = frontmatter.load(f)
                     # Get the child folder name
                     title = index_post.get("title", os.path.basename(subdir_path))
-                    subdirs.append(f"- [{title}]({rel_path})")
+                    index_links.append(f"- [{title}]({rel_path})")
 
         for md_file in md_files:
             file_path = os.path.join(root, md_file)
@@ -67,13 +66,9 @@ def index(
             index_post = frontmatter.load(f)
 
         # Add index links to the end of the content if there are any
-        if index_links or subdirs:
-            content = index_post.content.rstrip()  # Remove trailing whitespace
-            content += "\n\n## Index\n"
-            if subdirs:
-                content += "### Directories\n" + "\n".join(subdirs) + "\n"
-            if index_links:
-                content += "\n### Files\n" + "\n".join(index_links) + "\n"
+        if index_links:
+            content = index_post.content.rstrip()  # Remove trailing whitespace"
+            content += "\n" + "\n".join(index_links) + "\n"
             index_post.content = content
 
         # Write back to the file
