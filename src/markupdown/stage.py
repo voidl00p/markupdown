@@ -1,13 +1,13 @@
 import re
 import shutil
 from pathlib import Path
-from typing import Optional, Pattern
+from typing import Pattern
 
 
 def stage(
     source_dir: Path | str = Path("pages"),
     staging_dir: Path | str = Path("build/staging"),
-    pattern: Pattern[str] | str = r".*\.md$",
+    pattern: Pattern[str] | str = r".*[.]md$",
 ) -> None:
     """
     Copy files matching a pattern from source directory to staging directory.
@@ -16,7 +16,7 @@ def stage(
         source_dir: Directory containing source files. Defaults to "pages"
         staging_dir: Directory to stage files. Defaults to "build/staging"
         pattern: Pattern to match files. Can be a string or compiled regex pattern.
-                Defaults to ".*\.md$"
+                Defaults to ".*[.]md$"
 
     Raises:
         FileNotFoundError: If source directory doesn't exist
