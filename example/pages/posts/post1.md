@@ -1,7 +1,7 @@
 ---
 title: First Blog Post
 layout: posts
-date: 2025-01-30
+created_at: 2025-01-30
 ---
 
 # My First Blog Post
