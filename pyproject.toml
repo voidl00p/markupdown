@@ -17,6 +17,9 @@ build-backend = "pdm.backend"
 [tool.pdm]
 distribution = true
 
+[tool.pdm.build]
+includes = ["example"]
+
 [tool.pdm.scripts]
 black = "black src/markupdown/ tests/"
 isort = "isort src/markupdown/ tests/"
