@@ -8,7 +8,7 @@ def render(
     staging_dir: Path | str = Path("build/staging"),
     site_dir: Path | str = Path("build/site"),
     template_dir: Path | str = Path("templates"),
-    default_template: str = "posts.liquid",
+    default_template: str = "post.liquid",
 ) -> None:
     """
     Render staged markdown files using liquid templates.
@@ -35,7 +35,7 @@ def render(
         raise FileNotFoundError(f"Template directory {template_dir} does not exist")
 
     # Initialize Liquid environment
-    env = Environment(FileSystemLoader(str(template_dir)))
+    env = Environment(loader=FileSystemLoader(str(template_dir)))
 
     # Walk through staged files
     for source_file in staging_dir.rglob("*.md"):
