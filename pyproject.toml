@@ -14,6 +14,36 @@ license = {text = "CC0-1.0"}
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
-
 [tool.pdm]
 distribution = true
+
+[tool.pdm.scripts]
+black = "black src/markupdown/ tests/"
+isort = "isort src/markupdown/ tests/"
+style = {composite = ["black", "isort"]}
+test = "pytest"
+
+[tool.isort]
+profile = "black"
+case_sensitive = true
+
+[tool.pylint.master]
+fail-under = 7
+
+[tool.pylint.messages_control]
+max-line-length = 120
+
+[tool.pyright]
+include = ["src/markupdown/"]
+pythonPlatform = "All"
+
+[dependency-groups]
+test = [
+    "pytest>=8.3.4",
+]
+style = [
+    "black>=25.1.0",
+    "isort>=5.12.0",
+    "pylint>=2.17.5",
+    "pyright>=1.1.329",
+]
