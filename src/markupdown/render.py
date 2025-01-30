@@ -1,4 +1,5 @@
 import os
+from ntpath import isfile
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -9,6 +10,10 @@ from liquid import Environment, FileSystemLoader
 
 
 class LinkRenderer(mistune.HTMLRenderer):
+    def __init__(self, staging_dir: Path | str, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.staging_dir = Path(staging_dir)
+
     def link(self, text, url, title=None):
         """
         If the URL is relative, append ".html" to it.
@@ -18,7 +23,9 @@ class LinkRenderer(mistune.HTMLRenderer):
         if not parsed_url.scheme:
             url = url.strip(".md")
             url = url.strip("/")
-            url += ".html"
+            if not (self.staging_dir / url).is_dir():
+                url += ".html"
+            url = "/" + url
         return super().link(text, url, title)
 
 
@@ -74,7 +81,7 @@ def render(
         format_markdown = mistune.create_markdown(
             escape=False,
             plugins=["strikethrough", "footnotes", "table", "speedup"],
-            renderer=LinkRenderer(),
+            renderer=LinkRenderer(staging_dir),
         )
         html_content = format_markdown(page.content)
 
