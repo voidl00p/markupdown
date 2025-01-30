@@ -1,0 +1,19 @@
+[project]
+name = "markupdown"
+version = "0.1.0"
+description = "A modular static site generator in Python"
+authors = [
+    {name = "voidl00p", email = "null@voidl00p.net"},
+]
+dependencies = []
+requires-python = ">=3.12"
+readme = "README.md"
+license = {text = "CC0-1.0"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
+[tool.pdm]
+distribution = true
