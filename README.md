@@ -2,9 +2,9 @@
 
 markupdown is a dead-simple static site generator. Here's how it works:
 
-1. Crawl a directory structure and copy all markdown files to a staging directory.
-2. Run transformations on the staged markdown files and their frontmatter metadata.
-3. Render the metadata and markdown content using [liquid](https://shopify.github.io/liquid/) templates.
+1. Copies source markdown files into a staging directory.
+2. Runs transformations on the files in the staging directory.
+3. Renders the files using [liquid](https://shopify.github.io/liquid/) templates.
 
 That's it. Stupid simple.
 
@@ -74,8 +74,7 @@ This will bootstrap the project with a directory structure like this:
 │       └── post2.md
 ├── templates
 │   ├── index.liquid
-│   ├── home.liquid
-│   └── posts.liquid
+│   └── layout.liquid
 └── build.py
 ```
 
