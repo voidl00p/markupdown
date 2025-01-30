@@ -1,6 +1,4 @@
-import os
 from pathlib import Path
-from typing import Any, Dict
 
 from liquid import Environment, FileSystemLoader
 import markdown
