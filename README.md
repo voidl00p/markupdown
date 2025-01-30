@@ -3,7 +3,7 @@
 markupdown is a dead-simple static site generator. Here's how it works:
 
 1. Copies source markdown files into a staging directory.
-2. Runs transformations on the files in the staging directory.
+2. Runs transformations on the frontmatter in the staged files.
 3. Renders the files using [liquid](https://shopify.github.io/liquid/) templates.
 
 That's it. Stupid simple.
