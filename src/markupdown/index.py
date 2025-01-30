@@ -6,7 +6,7 @@ def index(
     staging_dir: Path | str = Path("build/staging"),
 ) -> None:
     """
-    Add index frontmatter to index.md files in the staging directory.
+    Add index links to the end of index.md files in the staging directory.
     Each entry will contain title and url information for the pages in that directory.
 
     Args:
@@ -21,7 +21,7 @@ def index(
             continue
 
         index_path = os.path.join(root, "index.md")
-        entries = []
+        index_links = []
 
         # Get all markdown files in the current directory except index.md
         md_files = [f for f in files if f.endswith(".md") and f != "index.md"]
@@ -40,18 +40,18 @@ def index(
             rel_path = os.path.relpath(file_path, staging_dir)
             url = "/" + os.path.splitext(rel_path)[0]  # Remove .md extension
             
-            entries.append({
-                "title": title,
-                "path": url
-            })
+            # Create markdown link
+            index_links.append(f"- [{title}]({url})")
 
-        # Update the index.md file with the new entries
+        # Read the index.md file
         with open(index_path, "r", encoding="utf-8") as f:
             index_post = frontmatter.load(f)
         
-        # Add or update the index field
-        index_post["template"] = "index"
-        index_post["index"] = entries
+        # Add index links to the end of the content if there are any
+        if index_links:
+            content = index_post.content.rstrip()  # Remove trailing whitespace
+            content += "\n\n## Index\n" + "\n".join(index_links) + "\n"
+            index_post.content = content
         
         # Write back to the file
         with open(index_path, "w", encoding="utf-8") as f:
