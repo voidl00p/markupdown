@@ -42,7 +42,7 @@ def index(
                         index_post = frontmatter.load(f)
                     # Get the child folder name
                     title = index_post.get("title", os.path.basename(subdir_path))
-                    index_links.append(f"- [{title}]({rel_path})")
+                    index_links.append({"title": title, "url": rel_path})
 
         for md_file in md_files:
             file_path = os.path.join(root, md_file)
@@ -59,17 +59,15 @@ def index(
             url = os.path.splitext(rel_path)[0]  # Remove .md extension
 
             # Create markdown link
-            index_links.append(f"- [{title}]({url})")
+            index_links.append({"title": title, "url": url})
 
         # Read the index.md file
         with open(index_path, "r", encoding="utf-8") as f:
             index_post = frontmatter.load(f)
 
-        # Add index links to the end of the content if there are any
+        # Add index links to the frontmatter if there are any
         if index_links:
-            content = index_post.content.rstrip()  # Remove trailing whitespace"
-            content += "\n" + "\n".join(index_links) + "\n"
-            index_post.content = content
+            index_post["children"] = index_links
 
         # Write back to the file
         with open(index_path, "w", encoding="utf-8") as f:

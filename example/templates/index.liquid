@@ -1,1 +1,7 @@
-{{ content }}
+{% if page.children %}
+<ul>
+    {% for child in page.children %}
+    <li><a href="{{ child.url }}">{{ child.title }}</a></li>
+    {% endfor %}
+</ul>
+{% endif %}

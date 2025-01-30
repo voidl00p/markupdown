@@ -34,7 +34,7 @@ def render(
     staging_dir: Path | str = Path("build/staging"),
     site_dir: Path | str = Path("build/site"),
     template_dir: Path | str = Path("templates"),
-    default_template: str = "page.liquid",
+    default_template: str = "layout.liquid",
 ) -> None:
     """
     Render staged markdown files using liquid templates.
