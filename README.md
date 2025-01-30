@@ -101,3 +101,15 @@ markupdown.minify()
 ```
 
 All of the module methods can take configuration parameters, but they ship with sane defaults that match the directory structure shown above.
+
+Now you can build the site:
+
+```bash
+$ ./build.py
+```
+
+And serve it locally:
+
+```bash
+$ python -c"import markupdown; markupdown.serve()"
+```
