@@ -2,7 +2,7 @@ from pathlib import Path
 
 import frontmatter
 from liquid import Environment, FileSystemLoader
-import markdown
+import mistune
 
 
 def render(
@@ -52,7 +52,7 @@ def render(
             page = frontmatter.load(f)
 
         # Convert markdown to HTML
-        html_content = markdown.markdown(page.content)
+        html_content = mistune.html(page.content)
 
         # Get template name from frontmatter or use default
         layout_template = str(page.metadata.get("layout", default_layout))
