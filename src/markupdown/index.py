@@ -50,6 +50,7 @@ def index(
             index_post = frontmatter.load(f)
         
         # Add or update the index field
+        index_post["template"] = "index"
         index_post["index"] = entries
         
         # Write back to the file

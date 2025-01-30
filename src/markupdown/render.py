@@ -9,7 +9,8 @@ def render(
     staging_dir: Path | str = Path("build/staging"),
     site_dir: Path | str = Path("build/site"),
     template_dir: Path | str = Path("templates"),
-    default_layout: str = "layout.liquid",
+    default_post_template: str = "post.liquid",
+    default_layout_template: str = "layout.liquid",
 ) -> None:
     """
     Render staged markdown files using liquid templates.
@@ -18,7 +19,7 @@ def render(
         staging_dir: Directory containing staged markdown files. Defaults to "build/staging"
         site_dir: Directory to output rendered files. Defaults to "build/site"
         template_dir: Directory containing liquid templates. Defaults to "templates"
-        default_layout: Default liquid template to use. Defaults to "layout.liquid"
+        default_layout_template: Default liquid template to use. Defaults to "layout.liquid"
 
     Raises:
         FileNotFoundError: If template directory doesn't exist
@@ -55,11 +56,20 @@ def render(
         html_content = markdown.markdown(page.content)
 
         # Get template name from frontmatter or use default
-        template_name = str(page.metadata.get("layout", default_layout))
+        post_template = str(page.metadata.get("template", default_post_template))
+        layout_template = str(page.metadata.get("layout", default_layout_template))
+
+        # Ensure the template ends with ".liquid"
+        if not post_template.endswith(".liquid"):
+            post_template += ".liquid"
+        if not layout_template.endswith(".liquid"):
+            layout_template += ".liquid"
 
         # Render template with content and frontmatter variables
-        template = env.get_template(template_name)
-        rendered = template.render(content=html_content, **page.metadata)
+        post_template = env.get_template(post_template)
+        layout_template = env.get_template(layout_template)
+        rendered = post_template.render(content=html_content, **page.metadata)
+        rendered = layout_template.render(content=rendered, **page.metadata)
 
         # Write rendered content to file
         with open(target_file, "w", encoding="utf-8") as f:
