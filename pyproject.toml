@@ -5,7 +5,7 @@ description = "A modular static site generator in Python"
 authors = [
     {name = "voidl00p", email = "null@voidl00p.net"},
 ]
-dependencies = []
+dependencies = ["python-liquid>=1.12.2"]
 requires-python = ">=3.12"
 readme = "README.md"
 license = {text = "CC0-1.0"}
