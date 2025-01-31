@@ -1,7 +1,4 @@
-import os
-from ntpath import isfile
 from pathlib import Path
-from typing import Any
 from urllib.parse import urlparse
 
 import frontmatter
