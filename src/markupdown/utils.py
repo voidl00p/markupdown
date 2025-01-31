@@ -14,4 +14,7 @@ def get_relative_path(path: Path, staging_dir: Path) -> str:
         str: Web-friendly relative path starting with '/' and without file extension
     """
     rel_path = path.relative_to(staging_dir)
-    return "/" + str(rel_path.with_suffix("")).replace(os.sep, "/")
+    rel_path = rel_path.with_suffix("")
+    if rel_path.name == "index":
+        rel_path = rel_path.parent
+    return "/" + str(rel_path).replace(os.sep, "/")
