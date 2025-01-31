@@ -3,6 +3,7 @@ from urllib.parse import urlparse
 
 import frontmatter
 import mistune
+import yaml
 from liquid import Environment, FileSystemLoader
 
 
@@ -27,7 +28,6 @@ class LinkRenderer(mistune.HTMLRenderer):
 
 
 def render(
-    base_url: str | None = None,
     staging_dir: Path | str = Path("build/staging"),
     site_dir: Path | str = Path("build/site"),
     template_dir: Path | str = Path("templates"),
@@ -89,7 +89,11 @@ def render(
         if not default_template.endswith(".liquid"):
             default_template += ".liquid"
 
-        site_metadata = {"base_url": base_url}
+        site_yaml = staging_dir / "site.yaml"
+        site_metadata = {}
+        if site_yaml.exists():
+            with open(site_yaml, "r") as f:
+                site_metadata = yaml.safe_load(f)
 
         # Render template with content and frontmatter variables
         page_template = env.get_template(default_template)

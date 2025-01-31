@@ -7,7 +7,8 @@ from typing import Pattern
 def stage(
     source_dir: Path | str = Path("md"),
     staging_dir: Path | str = Path("build/staging"),
-    pattern: Pattern[str] | str = r".*[.]md$|.*[.]yaml$",
+    site_yaml: Path | str = Path("site.yaml"),
+    pattern: Pattern[str] | str = r".*[.]md$",
 ) -> None:
     """
     Copy files matching a pattern from source directory to staging directory.
@@ -16,7 +17,7 @@ def stage(
         source_dir: Directory containing source files. Defaults to "md"
         staging_dir: Directory to stage files. Defaults to "build/staging"
         pattern: Pattern to match files. Can be a string or compiled regex pattern.
-                Defaults to ".*[.]md$|.*[.]yaml$"
+                Defaults to ".*[.]md$"
 
     Raises:
         FileNotFoundError: If source directory doesn't exist
@@ -25,6 +26,7 @@ def stage(
     # Convert string paths to Path objects
     source_dir = Path(source_dir)
     staging_dir = Path(staging_dir)
+    site_yaml = Path(site_yaml)
 
     # Convert string pattern to compiled regex
     if isinstance(pattern, str):
@@ -49,3 +51,7 @@ def stage(
 
             # Copy the file
             shutil.copy2(source_file, target_file)
+
+    # Copy site.yaml if it exists
+    if site_yaml.exists():
+        shutil.copy2(site_yaml, staging_dir / "site.yaml")
