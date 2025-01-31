@@ -6,6 +6,9 @@ import markupdown
 markupdown.stage()
 
 # Transform the frontmatter in the staged markdown files
+markupdown.site(
+    title="Example Site",
+)
 markupdown.index()
 markupdown.nav()
 

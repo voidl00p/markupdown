@@ -89,18 +89,18 @@ def render(
 
         # Get template name from frontmatter or use default
         if page_template := page.metadata.get("template"):
-            default_template = str(page_template)
-        elif default_template := site_metadata.get("default_template"):
-            default_template = str(default_template)
+            page_template = str(page_template)
+        elif page_template := site_metadata.get("default_template"):
+            page_template = str(page_template)
         else:
-            raise ValueError("No default template specified")
+            raise ValueError(f"No template specified in site.yaml or frontmatter for: {source_file}")
 
         # Ensure the template ends with ".liquid"
-        if not default_template.endswith(".liquid"):
-            default_template += ".liquid"
+        if not page_template.endswith(".liquid"):
+            page_template += ".liquid"
 
         # Render template with content and frontmatter variables
-        page_template = env.get_template(default_template)
+        page_template = env.get_template(page_template)
         rendered = page_template.render(
             content=html_content,
             site=site_metadata,

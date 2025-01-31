@@ -3,6 +3,7 @@ from .init import init
 from .nav import nav
 from .render import render
 from .serve import serve
+from .site import site
 from .stage import stage
 
 __all__ = [
@@ -11,5 +12,6 @@ __all__ = [
     "nav",
     "render",
     "serve",
+    "site",
     "stage",
 ]
