@@ -2,10 +2,10 @@
 # It is not intended for manual editing.
 
 [metadata]
-groups = ["default", "style", "test"]
+groups = ["default", "css", "style", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:80c1ab5c4da623657aa86954793a8cba374e109288b3a7210f09a52875288307"
+content_hash = "sha256:300c789c4ee2d7d40334859249fa194600960e235b1ebbc197bc1e4a774dbabb"
 
 [[metadata.targets]]
 requires_python = ">=3.12"
@@ -136,6 +136,20 @@ groups = ["style"]
 files = [
     {file = "mccabe-0.7.0-py2.py3-none-any.whl", hash = "sha256:6c2d30ab6be0e4a46919781807b4f0d834ebdd6c6e3dca0bda5a15f863427b6e"},
     {file = "mccabe-0.7.0.tar.gz", hash = "sha256:348e0240c33b60bbdf4e523192ef919f28cb2c3d7d5c7794f74009290f236325"},
+]
+
+[[package]]
+name = "minify-html"
+version = "0.15.0"
+summary = "Extremely fast and smart HTML + JS + CSS minifier"
+groups = ["css"]
+files = [
+    {file = "minify_html-0.15.0-cp312-cp312-macosx_10_12_x86_64.whl", hash = "sha256:2a9aef71b24c3d38c6bece2db3bf707443894958b01f1c27d3a6459ba4200e59"},
+    {file = "minify_html-0.15.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:70251bd7174b62c91333110301b27000b547aa2cc06d4fe6ba6c3f11612eecc9"},
+    {file = "minify_html-0.15.0-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1056819ea46e9080db6fed678d03511c7e94c2a615e72df82190ea898dc82609"},
+    {file = "minify_html-0.15.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ea315ad6ac33d7463fac3f313bba8c8d9a55f4811971c203eed931203047e5c8"},
+    {file = "minify_html-0.15.0-cp312-none-win_amd64.whl", hash = "sha256:01ea40dc5ae073c47024f02758d5e18e55d853265eb9c099040a6c00ab0abb99"},
+    {file = "minify_html-0.15.0.tar.gz", hash = "sha256:cf4c36b6f9af3b0901bd2a0a29db3b09c0cdf0c38d3dde28e6835bce0f605d37"},
 ]
 
 [[package]]

@@ -13,4 +13,5 @@ markupdown.index()
 markupdown.nav()
 
 # Render the staged markdown files as HTML
+markupdown.css()
 markupdown.render()
