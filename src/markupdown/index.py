@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 import frontmatter
+from .utils import get_relative_path
 
 
 def _handle_file(file_path: Path, staging_dir: Path) -> dict:
@@ -23,8 +24,7 @@ def _handle_file(file_path: Path, staging_dir: Path) -> dict:
     title = post.get("title", file_path.stem)
 
     # Calculate relative URL from staging directory
-    rel_path = os.path.relpath(file_path, staging_dir)
-    path = "/" + os.path.splitext(rel_path)[0]  # Remove .md extension
+    path = get_relative_path(file_path, staging_dir)
 
     return {"title": title, "path": path}
 
@@ -45,7 +45,7 @@ def _handle_directory(dir_path: Path, staging_dir: Path) -> dict | None:
         return None
 
     # Calculate relative URL from staging directory
-    rel_path = "/" + os.path.relpath(dir_path, staging_dir)
+    rel_path = get_relative_path(dir_path, staging_dir)
 
     # Get the title from the index.md frontmatter
     with open(index_path, "r", encoding="utf-8") as f:

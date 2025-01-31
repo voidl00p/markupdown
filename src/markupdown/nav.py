@@ -3,6 +3,7 @@ from pathlib import Path
 
 import frontmatter
 import yaml
+from .utils import get_relative_path
 
 
 def nav(
@@ -49,8 +50,7 @@ def nav(
                 continue
 
             # Calculate relative URL from staging directory
-            file_rel_path = file_path.relative_to(staging_dir)
-            path = "/" + str(file_rel_path.with_suffix("")).replace(os.sep, "/")
+            path = get_relative_path(file_path, staging_dir)
 
             # Get the title from frontmatter, fallback to filename without extension
             title = post.get("title", file_path.stem)
