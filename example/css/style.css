@@ -19,3 +19,28 @@ a {
 a:hover {
     text-decoration: underline;
 }
+
+/* Navigation styles */
+.nav {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    margin-bottom: 2rem;
+}
+
+.nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 1.5rem;
+}
+
+.nav-list a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+}
+
+.nav-list a:hover {
+    color: #007bff;
+}

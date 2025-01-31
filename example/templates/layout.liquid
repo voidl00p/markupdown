@@ -10,6 +10,14 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+    <nav class="nav">
+        <ul class="nav-list">
+            {% for link in site.nav %}
+                <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+            {% endfor %}
+        </ul>
+    </nav>
+
     {{ content }}
 
     {% include "index.liquid" %}
