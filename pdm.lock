@@ -5,7 +5,7 @@
 groups = ["default", "css", "style", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:300c789c4ee2d7d40334859249fa194600960e235b1ebbc197bc1e4a774dbabb"
+content_hash = "sha256:329b7dc5c36b8a7fdbcc2061914c810f8752b62a7ced5be780ecf7993ae51fa9"
 
 [[metadata.targets]]
 requires_python = ">=3.12"
@@ -142,7 +142,7 @@ files = [
 name = "minify-html"
 version = "0.15.0"
 summary = "Extremely fast and smart HTML + JS + CSS minifier"
-groups = ["css"]
+groups = ["default"]
 files = [
     {file = "minify_html-0.15.0-cp312-cp312-macosx_10_12_x86_64.whl", hash = "sha256:2a9aef71b24c3d38c6bece2db3bf707443894958b01f1c27d3a6459ba4200e59"},
     {file = "minify_html-0.15.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:70251bd7174b62c91333110301b27000b547aa2cc06d4fe6ba6c3f11612eecc9"},

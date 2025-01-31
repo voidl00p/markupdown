@@ -2,6 +2,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import frontmatter
+import minify_html
 import mistune
 import yaml
 from liquid import Environment, FileSystemLoader
@@ -106,6 +107,9 @@ def render(
             site=site_metadata,
             page=page.metadata,
         )
+
+        # Minify the HTML
+        rendered = minify_html.minify(rendered, minify_css=True, minify_js=True)
 
         # Write rendered content to file
         with open(target_file, "w", encoding="utf-8") as f:
