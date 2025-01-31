@@ -31,17 +31,15 @@ def render(
     staging_dir: Path | str = Path("build/staging"),
     site_dir: Path | str = Path("build/site"),
     template_dir: Path | str = Path("templates"),
-    default_template: str = "layout.liquid",
 ) -> None:
     """
     Render staged markdown files using liquid templates.
 
     Args:
-        site_root: Root URL of the site. Defaults to ".".
         staging_dir: Directory containing staged markdown files. Defaults to "build/staging"
         site_dir: Directory to output rendered files. Defaults to "build/site"
         template_dir: Directory containing liquid templates. Defaults to "templates"
-        default_page: Default liquid template to use for each page. Defaults to "page.liquid"
+        default_template: Default liquid template to use for each page. Defaults to "layout.liquid"
 
     Raises:
         FileNotFoundError: If template directory doesn't exist
@@ -82,18 +80,24 @@ def render(
         )
         html_content = format_markdown(page.content)
 
-        # Get template name from frontmatter or use default
-        default_template = str(page.metadata.get("template", default_template))
-
-        # Ensure the template ends with ".liquid"
-        if not default_template.endswith(".liquid"):
-            default_template += ".liquid"
-
+        # Load site metadata
         site_yaml = staging_dir / "site.yaml"
         site_metadata = {}
         if site_yaml.exists():
             with open(site_yaml, "r") as f:
                 site_metadata = yaml.safe_load(f)
+
+        # Get template name from frontmatter or use default
+        if page_template := page.metadata.get("template"):
+            default_template = str(page_template)
+        elif default_template := site_metadata.get("default_template"):
+            default_template = str(default_template)
+        else:
+            raise ValueError("No default template specified")
+
+        # Ensure the template ends with ".liquid"
+        if not default_template.endswith(".liquid"):
+            default_template += ".liquid"
 
         # Render template with content and frontmatter variables
         page_template = env.get_template(default_template)
