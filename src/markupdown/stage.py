@@ -5,7 +5,7 @@ from typing import Pattern
 
 
 def stage(
-    source_dir: Path | str = Path("pages"),
+    source_dir: Path | str = Path("md"),
     staging_dir: Path | str = Path("build/staging"),
     pattern: Pattern[str] | str = r".*[.]md$|.*[.]yaml$",
 ) -> None:
@@ -13,7 +13,7 @@ def stage(
     Copy files matching a pattern from source directory to staging directory.
 
     Args:
-        source_dir: Directory containing source files. Defaults to "pages"
+        source_dir: Directory containing source files. Defaults to "md"
         staging_dir: Directory to stage files. Defaults to "build/staging"
         pattern: Pattern to match files. Can be a string or compiled regex pattern.
                 Defaults to ".*[.]md$|.*[.]yaml$"
