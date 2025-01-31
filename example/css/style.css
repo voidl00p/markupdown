@@ -33,6 +33,30 @@ a:hover {
     text-decoration: underline;
 }
 
+/* Header styles */
+.header {
+    background-color: var(--bg-color);
+    padding: 2rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.site-title {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.site-title a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.site-title a:hover {
+    color: var(--primary-color);
+}
+
 /* Navigation styles */
 .nav {
     background-color: var(--nav-bg);
