@@ -18,6 +18,7 @@ markupdown comes with the following add-on modules:
 - index: Generates index frontmatter for index.md files
 - lint: Checks all markdown files for syntax, grammar, readability, and style.
 - minify: Minifies CSS, JS, and HTML
+- nav: Updates site.yaml with navigation links
 - og: Generates Open Graph frontmatter
 - twitter: Generates Twitter card frontmatter
 - related: Generates related content frontmatter
@@ -75,6 +76,7 @@ This will bootstrap the project with a directory structure like this:
 ├── templates
 │   ├── index.liquid
 │   └── layout.liquid
+├── site.yaml
 └── build.py
 ```
 
@@ -87,6 +89,7 @@ import markupdown
 markupdown.stage()
 
 # Transform the frontmatter in the staged markdown files
+markupdown.nav()
 markupdown.index()
 markupdown.changelog()
 markupdown.backref()

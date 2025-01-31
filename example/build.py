@@ -7,6 +7,7 @@ markupdown.stage()
 
 # Transform the frontmatter in the staged markdown files
 markupdown.index()
+markupdown.nav()
 
 # Render the staged markdown files as HTML
 markupdown.render()
