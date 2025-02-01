@@ -21,9 +21,10 @@ distribution = true
 includes = ["example", "src"]
 
 [tool.pdm.scripts]
+autoflake = "autoflake --remove-all-unused-imports --in-place --recursive src/markupdown/ tests/"
 black = "black src/markupdown/ tests/"
 isort = "isort src/markupdown/ tests/"
-style = {composite = ["black", "isort"]}
+style = { composite = ["black", "isort", "autoflake"] }
 test = "pytest"
 
 [tool.isort]
@@ -49,4 +50,5 @@ style = [
     "isort>=5.12.0",
     "pylint>=2.17.5",
     "pyright>=1.1.329",
+    "autoflake>=2.3.1",
 ]

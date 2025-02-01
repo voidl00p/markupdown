@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 
 import frontmatter
-import yaml
 
 from .site import Site
 from .utils import get_relative_path

@@ -1,7 +1,6 @@
 import os
 from functools import partial
 from http.server import HTTPServer, SimpleHTTPRequestHandler
-from pathlib import Path
 
 from .site import Site
 
