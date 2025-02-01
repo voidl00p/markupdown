@@ -90,10 +90,11 @@ a:hover {
     color: var(--primary-color);
 }
 
-main {
+main, nav:not(.nav) {
     max-width: 1200px;
     margin: 2rem auto;
     padding: 0 1rem;
+    display: block;
 }
 
 @media (max-width: 768px) {

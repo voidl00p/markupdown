@@ -13,20 +13,16 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <header class="header">
-        <h1 class="site-title"><a href="/">{{ site.title }}</a></h1>
-    </header>
-    <nav class="nav">
-        <ul class="nav-list">
-            {% for link in site.nav %}
-                <li><a href="{{ link.path }}">{{ link.title }}</a></li>
-            {% endfor %}
-        </ul>
-    </nav>
+
+    {% include "header.liquid" %}
+    {% include "nav.liquid" %}
 
     <main>
         {{ content }}
-        {% include "index.liquid" %}
     </main>
+
+    {% include "index.liquid" %}
+    {% include "footer.liquid" %}
+
 </body>
 </html>

@@ -1,7 +1,9 @@
 {% if page.children %}
-<ul>
-    {% for child in page.children %}
-    <li><a href="{{ child.path }}">{{ child.title }}</a></li>
-    {% endfor %}
-</ul>
+<nav>
+    <ul>
+        {% for child in page.children %}
+        <li><a href="{{ child.path }}">{{ child.title }}</a></li>
+        {% endfor %}
+    </ul>
+</nav>
 {% endif %}
