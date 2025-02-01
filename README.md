@@ -18,9 +18,6 @@ site = index(site)
 site = nav(site)
 # Render the markdown as HTML
 site = render(site)
-
-# Serve the site
-serve(site)
 ```
 
 ## How it works
@@ -140,12 +137,3 @@ Run `./build.py` will generate a `site` directory like this:
 You can also call `serve(site)` at the end of `build.py` to start a local HTTP server.
 
 Most of these methods take additional arguments. Go read the docs to see what you can do.
-
-## How it works
-
-markupdown does the following:
-
-1. Creates a `Site` object and markupdown will create a `site` directory and copy over the CSS, JS, and template files.
-2. Run various functions to create, modify, or delete staged files.
-
-That's it. Stupid simple. Worse is better.
