@@ -23,6 +23,15 @@ site = render(site)
 serve(site)
 ```
 
+## How it works
+
+markupdown does the following:
+
+1. Creates a `Site` object and markupdown will create a `site` directory and copy over the CSS, JS, and template files.
+2. Run various functions to create, modify, or delete staged files.
+
+That's it. Stupid simple. Worse is better.
+
 ## Modules
 
 markupdown has the following core modules:
@@ -106,20 +115,6 @@ If you have a directory structure like this:
 │   ├── index.liquid
 │   └── layout.liquid
 └── build.py
-```
-
-And the `build.py` file looks like this:
-
-```python
-from markupdown import *
-
-site = Site()
-# Generate index pages for the site
-site = index(site)
-# Generate navigation links
-site = nav(site)
-# Render the markdown as HTML
-site = render(site)
 ```
 
 Run `./build.py` will generate a `site` directory like this:
