@@ -17,7 +17,9 @@ class CustomHandler(SimpleHTTPRequestHandler):
         return super().do_GET()
 
 
-def serve(site: Site, port: int = 8000):
+def serve(site: Site | None = None, port: int = 8000):
+    site = site or Site()
+
     handler = partial(CustomHandler, directory=str(site.site_dir))
     server = HTTPServer(("0.0.0.0", port), handler)
 

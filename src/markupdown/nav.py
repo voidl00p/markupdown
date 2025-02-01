@@ -7,7 +7,7 @@ from .site import Site
 from .utils import get_relative_path
 
 
-def nav(site: Site) -> Site:
+def nav(site: Site) -> None:
     """
     Update site.yaml in the staging directory with a "nav" field containing a list of
     title/path entries based on the following criteria:
@@ -59,5 +59,3 @@ def nav(site: Site) -> Site:
     nav_entries.sort(key=lambda x: x["title"])
 
     site.template_vars["nav"] = nav_entries
-
-    return site

@@ -58,7 +58,7 @@ def _handle_directory(dir_path: Path, staging_dir: Path) -> dict | None:
     return {"title": title, "path": rel_path}
 
 
-def index(site: Site) -> Site:
+def index(site: Site) -> None:
     """
     Add index links to the end of index.md files in the staging directory.
     Each entry will contain title and url information for the pages in that directory.
@@ -66,7 +66,6 @@ def index(site: Site) -> Site:
     Args:
         site: Site object containing the site directory
     """
-    list()
     for root, _, files in os.walk(site.site_dir):
         root_path = Path(root)
 
@@ -104,4 +103,3 @@ def index(site: Site) -> Site:
         with open(index_path, "w", encoding="utf-8") as f:
             f.write(frontmatter.dumps(index_post))
 
-    return site

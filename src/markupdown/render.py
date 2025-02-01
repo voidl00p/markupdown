@@ -28,7 +28,7 @@ class LinkRenderer(mistune.HTMLRenderer):
         return super().link(text, url, title)
 
 
-def render(site: Site) -> Site:
+def render(site: Site) -> None:
     """
     Render staged markdown files using liquid templates.
 
@@ -90,4 +90,3 @@ def render(site: Site) -> Site:
         with open(target_file, "w", encoding="utf-8") as f:
             f.write(rendered)
 
-    return site

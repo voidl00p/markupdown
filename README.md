@@ -13,11 +13,11 @@ from markupdown import *
 # Create a Site object with configuration
 site = Site()
 # Generate index pages for the site
-site = index(site)
+index(site)
 # Generate navigation links
-site = nav(site)
+nav(site)
 # Render the markdown as HTML
-site = render(site)
+render(site)
 ```
 
 ## How it works
