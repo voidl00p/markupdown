@@ -2,10 +2,10 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import frontmatter
-import minify_html
 import mistune
-import yaml
 from liquid import Environment, FileSystemLoader
+
+from .site import Site
 
 
 class LinkRenderer(mistune.HTMLRenderer):
@@ -28,43 +28,26 @@ class LinkRenderer(mistune.HTMLRenderer):
         return super().link(text, url, title)
 
 
-def render(
-    staging_dir: Path | str = Path("build/staging"),
-    site_dir: Path | str = Path("build/site"),
-    template_dir: Path | str = Path("templates"),
-) -> None:
+def render(site: Site) -> Site:
     """
     Render staged markdown files using liquid templates.
 
     Args:
-        staging_dir: Directory containing staged markdown files. Defaults to "build/staging"
-        site_dir: Directory to output rendered files. Defaults to "build/site"
-        template_dir: Directory containing liquid templates. Defaults to "templates"
-        default_template: Default liquid template to use for each page. Defaults to "layout.liquid"
+        site: Site object containing the site directory
 
     Raises:
         FileNotFoundError: If template directory doesn't exist
         OSError: If there are issues creating directories or writing files
     """
-    # Convert string paths to Path objects
-    staging_dir = Path(staging_dir)
-    site_dir = Path(site_dir)
-    template_dir = Path(template_dir)
-
-    # Ensure required directories exist
-    staging_dir.mkdir(parents=True, exist_ok=True)
-    site_dir.mkdir(parents=True, exist_ok=True)
-    if not template_dir.exists():
-        raise FileNotFoundError(f"Template directory {template_dir} does not exist")
 
     # Initialize Liquid environment
-    env = Environment(loader=FileSystemLoader(str(template_dir)))
+    env = Environment(loader=FileSystemLoader(site.template_dir))
 
     # Walk through staged files
-    for source_file in staging_dir.rglob("*.md"):
+    for source_file in site.site_dir.rglob("*.md"):
         # Calculate relative path and create target HTML file path
-        rel_path = source_file.relative_to(staging_dir)
-        target_file = site_dir / rel_path.with_suffix(".html")
+        rel_path = source_file.relative_to(site.site_dir)
+        target_file = site.site_dir / rel_path.with_suffix(".html")
 
         # Create parent directories if they don't exist
         target_file.parent.mkdir(parents=True, exist_ok=True)
@@ -77,24 +60,19 @@ def render(
         format_markdown = mistune.create_markdown(
             escape=False,
             plugins=["strikethrough", "footnotes", "table", "speedup"],
-            renderer=LinkRenderer(staging_dir),
+            renderer=LinkRenderer(site.site_dir),
         )
         html_content = format_markdown(page.content)
-
-        # Load site metadata
-        site_yaml = staging_dir / "site.yaml"
-        site_metadata = {}
-        if site_yaml.exists():
-            with open(site_yaml, "r") as f:
-                site_metadata = yaml.safe_load(f)
 
         # Get template name from frontmatter or use default
         if page_template := page.metadata.get("template"):
             page_template = str(page_template)
-        elif page_template := site_metadata.get("default_template"):
+        elif page_template := site.default_template:
             page_template = str(page_template)
         else:
-            raise ValueError(f"No template specified in site.yaml or frontmatter for: {source_file}")
+            raise ValueError(
+                f"No template specified in site.yaml or frontmatter for: {source_file}"
+            )
 
         # Ensure the template ends with ".liquid"
         if not page_template.endswith(".liquid"):
@@ -104,13 +82,12 @@ def render(
         page_template = env.get_template(page_template)
         rendered = page_template.render(
             content=html_content,
-            site=site_metadata,
+            site=site.template_vars,
             page=page.metadata,
         )
-
-        # Minify the HTML
-        rendered = minify_html.minify(rendered, minify_css=True, minify_js=True)
 
         # Write rendered content to file
         with open(target_file, "w", encoding="utf-8") as f:
             f.write(rendered)
+
+    return site

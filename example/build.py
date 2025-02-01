@@ -1,17 +1,11 @@
 #!/usr/bin/env python3
 
-import markupdown
+from markupdown import *
 
-# Stage the `pages` markdown files
-markupdown.stage()
+site = Site()
 
-# Transform the frontmatter in the staged markdown files
-markupdown.site(
-    title="Example Site",
-)
-markupdown.index()
-markupdown.nav()
+site = index(site)
+site = nav(site)
+site = render(site)
 
-# Render the staged markdown files as HTML
-markupdown.css()
-markupdown.render()
+serve(site)

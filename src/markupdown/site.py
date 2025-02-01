@@ -1,33 +1,51 @@
-import yaml
+import shutil
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
+
+from .utils import copy_files
 
 
-def site(
-    title: str = "markupdown Example Site",
-    default_template: str = "layout.liquid",
-    staging_dir: Path | str = Path("build/staging"),
-    **kwargs,
-) -> None:
-    """
-    Write site configuration to site.yaml in the staging directory.
+@dataclass
+class Site:
+    title: str = "markupdown Example Site"
+    markdown_dir: Path = Path("pages")
+    template_dir: Path = Path("templates")
+    css_dir: Path = Path("css")
+    img_dir: Path = Path("img")
+    js_dir: Path = Path("js")
+    site_dir: Path = Path("site")
+    default_template: str = "layout.liquid"
+    template_vars: dict[str, object] = field(default_factory=dict)
 
-    Args:
-        title: Site title
-        default_template: Default template to use for pages
-        staging_dir: Directory to write site.yaml. Defaults to "build/staging"
+    def __post_init__(self) -> None:
+        self.site_dir.mkdir(parents=True, exist_ok=True)
 
-    Raises:
-        OSError: If there are issues creating directories or writing the file
-    """
-    staging_dir = Path(staging_dir)
-    staging_dir.mkdir(parents=True, exist_ok=True)
+        # Copy CSS files (include the 'css' folder in the destination)
+        copy_files(
+            src_dir=self.css_dir,
+            dest_dir=self.site_dir,
+            patterns="*.css",
+        )
 
-    site_config = kwargs
-    site_config |= {
-        "title": title,
-        "default_template": default_template,
-    }
+        # Copy image files (include the 'img' folder in the destination)
+        copy_files(
+            src_dir=self.img_dir,
+            dest_dir=self.site_dir,
+            patterns=["*.png", "*.jpg", "*.jpeg"],
+        )
 
-    with open(staging_dir / "site.yaml", "w") as f:
-        yaml.safe_dump(site_config, f, default_flow_style=False)
+        # Copy JavaScript files (include the 'js' folder in the destination)
+        copy_files(
+            src_dir=self.js_dir,
+            dest_dir=self.site_dir,
+            patterns="*.js",
+        )
+
+        # Copy markdown files (do NOT include the 'pages' folder in the destination)
+        copy_files(
+            src_dir=self.markdown_dir,
+            dest_dir=self.site_dir,
+            patterns="*.md",
+            include_src_dir=False,
+            err_on_missing=True,
+        )

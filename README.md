@@ -1,68 +1,32 @@
 # markupdown
 
-markupdown is a dead-simple static site generator. Here's how it works:
-
-1. Copies source markdown files into a staging directory.
-2. Runs transformations on the frontmatter in the staged files.
-3. Renders the files using [liquid](https://shopify.github.io/liquid/) templates.
-
-That's it. Stupid simple.
-
-## Modules
-
-markupdown comes with the following add-on modules:
-
-- backref: Generates backreference frontmatter
-- changelog: Generates changelog frontmatter
-- images: Processes images
-- index: Generates index frontmatter for index.md files
-- lint: Checks all markdown files for syntax, grammar, readability, and style.
-- minify: Minifies CSS, JS, and HTML
-- nav: Updates site.yaml with navigation links
-- og: Generates Open Graph frontmatter
-- twitter: Generates Twitter card frontmatter
-- related: Generates related content frontmatter
-- rss: Generates an RSS feed
-- sitemap: Generates a sitemap.xml
-- stage: Copies files matching a pattern from one directory structure to another
-
-These modules are all optional and may be run in any order.
+markupdown is a dead-simple static site generator toolkit.
 
 ## Installation
 
-Install the package using pip:
-
-```bash
-pip install markupdown
-```
-
-To install an add-on module, run:
-
-```bash
-pip install markupdown[module_name]
-```
-
-If you want all the modules, run:
+Install everything:
 
 ```bash
 pip install markupdown[all]
 ```
 
-## Usage
-
-From your project's root directory, run:
+Or just the core:
 
 ```bash
-$ python -c"import markupdown; markupdown.init()"
+pip install markupdown
 ```
 
-This will bootstrap the project with a directory structure like this:
-
+Or some add-on modules:
+```bash
+pip install markupdown[minify,rss]
 ```
+
+## Usage
+
+If you have a directory structure like this:
+
+```text
 .
-├── build
-│   ├── site
-│   └── staging
 ├── css
 │   └── style.css
 ├── img
@@ -76,43 +40,73 @@ This will bootstrap the project with a directory structure like this:
 ├── templates
 │   ├── index.liquid
 │   └── layout.liquid
-├── site.yaml
 └── build.py
 ```
 
-`build.py` will contain the following code:
+And the `build.py` file looks like this:
 
 ```python
-import markupdown
+from markupdown import *
 
-# Stage the `pages` markdown files
-markupdown.stage()
-
-# Transform the frontmatter in the staged markdown files
-markupdown.nav()
-markupdown.index()
-markupdown.changelog()
-markupdown.backref()
-markupdown.related()
-
-# Generate static site
-markupdown.images()
-markupdown.render()
-markupdown.sitemap()
-markupdown.rss()
-markupdown.minify()
+site = Site()
+# Generate index pages for the site
+site = index(site)
+# Generate navigation links
+site = nav(site)
+# Render the markdown as HTML
+site = render(site)
 ```
 
-All of the module methods can take configuration parameters, but they ship with sane defaults that match the directory structure shown above.
+Run `./build.py` will generate a `site` directory like this:
 
-Now you can build the site:
-
-```bash
-$ ./build.py
+```text
+.
+├── css
+│   └── style.css
+├── img
+│   └── image.png
+├── site
+│   ├── index.html
+│   ├── index.md
+│   └── posts
+│       ├── index.html
+│       ├── index.md
+│       ├── post1.html
+│       ├── post1.md
+│       ├── post2.html
+│       └── post2.md
 ```
 
-And serve it locally:
+Of course, most of these methods take additional arguments. Go read the docs to see what you can do.
 
-```bash
-$ python -c"import markupdown; markupdown.serve()"
-```
+## Modules
+
+markupdown comes with the following core modules:
+
+- index: Generates index frontmatter for index.md files
+- nav: Updates site.yaml with navigation links
+- render: Renders the markdown using [liquid](https://shopify.github.io/liquid/) templates.
+
+And the following add-on modules:
+
+- backref: Generates backreference frontmatter
+- changelog: Generates changelog frontmatter
+- lint: Checks all markdown files for syntax, grammar, readability, and style.
+- minify: Minifies CSS, JS, and HTML
+- og: Generates Open Graph frontmatter
+- twitter: Generates Twitter card frontmatter
+- related: Generates related content frontmatter
+- rss: Generates an RSS feed
+- sitemap: Generates a sitemap.xml
+
+## How it works
+
+markupdown does the following:
+
+1. Creates a `Site` object and markupdown will create a `site` directory and copy over the CSS, JS, and template files.
+2. Run various functions to create, modify, or delete staged files.
+
+That's it. Stupid simple. Worse is better.
+
+## But why?
+

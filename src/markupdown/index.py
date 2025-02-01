@@ -2,6 +2,8 @@ import os
 from pathlib import Path
 
 import frontmatter
+
+from .site import Site
 from .utils import get_relative_path
 
 
@@ -56,20 +58,16 @@ def _handle_directory(dir_path: Path, staging_dir: Path) -> dict | None:
     return {"title": title, "path": rel_path}
 
 
-def index(
-    staging_dir: Path | str = Path("build/staging"),
-) -> None:
+def index(site: Site) -> Site:
     """
     Add index links to the end of index.md files in the staging directory.
     Each entry will contain title and url information for the pages in that directory.
 
     Args:
-        staging_dir: Path to the staging directory containing the markdown files
+        site: Site object containing the site directory
     """
-    # Convert string paths to Path objects
-    staging_dir = Path(staging_dir)
-
-    for root, _, files in os.walk(staging_dir):
+    list()
+    for root, _, files in os.walk(site.site_dir):
         root_path = Path(root)
 
         # Skip if there's no index.md in this directory
@@ -86,12 +84,12 @@ def index(
         for name in os.listdir(root):
             subdir_path = root_path / name
             if subdir_path.is_dir():
-                if dir_entry := _handle_directory(subdir_path, staging_dir):
+                if dir_entry := _handle_directory(subdir_path, site.site_dir):
                     index_links.append(dir_entry)
 
         # Process markdown files
         for md_file in md_files:
-            file_entry = _handle_file(root_path / md_file, staging_dir)
+            file_entry = _handle_file(root_path / md_file, site.site_dir)
             index_links.append(file_entry)
 
         # Read the index.md file
@@ -105,3 +103,5 @@ def index(
         # Write back to the file
         with open(index_path, "w", encoding="utf-8") as f:
             f.write(frontmatter.dumps(index_post))
+
+    return site
