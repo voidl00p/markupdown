@@ -77,7 +77,9 @@ Run `./build.py` will generate a `site` directory like this:
 │       └── post2.md
 ```
 
-Of course, most of these methods take additional arguments. Go read the docs to see what you can do.
+You can also call `serve(site)` at the end of `build.py` to start a local HTTP server.
+
+Most of these methods take additional arguments. Go read the docs to see what you can do.
 
 ## Modules
 
