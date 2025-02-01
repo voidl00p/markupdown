@@ -1,12 +1,11 @@
 # markupdown
 
-markupdown is a dead-simple static site generator toolkit.
+markupdown is a dead-simple static site generator toolkit. Most static site generators do too much; they're complicated. I wanted something dead simple to manage my blog. So I built markupdown.
 
-Most static site generators do too much; they're complicated. I wanted something dead simple to manage my blog. So I built markupdown.
-
-markupdown is simply a collection of modules that transform and render markdown, JS, CSS, HTML, images, and Liquid templates. You write a `build.py` file that calls the modules you want and run it. That's it!
+markupdown is simply a collection of modules that transform files (markdown, JS, CSS, HTML, images, and Liquid templates). You write a `build.py` file that calls the modules you want and run it. That's it!
 
 Here's what a `build.py` file looks like:
+
 ```python
 #!/usr/bin/env python3
 from markupdown import *
@@ -131,16 +130,16 @@ Run `./build.py` will generate a `site` directory like this:
 │   └── style.css
 ├── img
 │   └── image.png
-├── site
-│   ├── index.html
-│   ├── index.md
-│   └── posts
-│       ├── index.html
-│       ├── index.md
-│       ├── post1.html
-│       ├── post1.md
-│       ├── post2.html
-│       └── post2.md
+└── site
+    ├── index.html
+    ├── index.md
+    └── posts
+        ├── index.html
+        ├── index.md
+        ├── post1.html
+        ├── post1.md
+        ├── post2.html
+        └── post2.md
 ```
 
 You can also call `serve(site)` at the end of `build.py` to start a local HTTP server.
