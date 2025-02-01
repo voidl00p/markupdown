@@ -1,18 +1,22 @@
 import os
 from functools import partial
 from http.server import HTTPServer, SimpleHTTPRequestHandler
+from pathlib import Path
 
 from .site import Site
 
 
 class CustomHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
-        path = self.path.strip("/")
-        # If the request does not contain a file extension
-        if not os.path.exists(path):
-            possible_html_path = path + ".html"
-            if os.path.exists(possible_html_path):
-                self.path = "/" + possible_html_path
+        url_path = Path(self.path.strip("/"))
+        file_path = self.directory / url_path
+
+        if not file_path.exists():
+            # Check if there's an .html file
+            possible_html_path = file_path.with_suffix(".html")
+            if possible_html_path.exists():
+                self.path = str(possible_html_path.relative_to(self.directory))
+                print(f" Serving {self.path}")
 
         return super().do_GET()
 

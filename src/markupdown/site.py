@@ -33,6 +33,7 @@ class Site:
             src_dir=self.css_dir,
             dest_dir=self.site_dir,
             patterns="*.css",
+            include_src_dir=True,
         )
 
         # Copy image files (include the 'img' folder in the destination)
@@ -40,6 +41,7 @@ class Site:
             src_dir=self.img_dir,
             dest_dir=self.site_dir,
             patterns=["*.png", "*.jpg", "*.jpeg"],
+            include_src_dir=True,
         )
 
         # Copy JavaScript files (include the 'js' folder in the destination)
@@ -47,6 +49,7 @@ class Site:
             src_dir=self.js_dir,
             dest_dir=self.site_dir,
             patterns="*.js",
+            include_src_dir=True,
         )
 
         # Copy markdown files (do NOT include the 'pages' folder in the destination)
@@ -54,6 +57,5 @@ class Site:
             src_dir=self.markdown_dir,
             dest_dir=self.site_dir,
             patterns="*.md",
-            include_src_dir=False,
             err_on_missing=True,
         )
