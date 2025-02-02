@@ -7,3 +7,5 @@
 - related: Generates related content frontmatter
 - rss: Generates an RSS feed
 - sitemap: Generates a sitemap.xml
+
+- Add customization section to README

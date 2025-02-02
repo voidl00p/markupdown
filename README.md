@@ -60,26 +60,10 @@ pip install markupdown
 After you install markupdown, go to an empty directory and initialize it:
 
 ```bash
-python -c"import markupdown; markupdown.init()"
+python -m markupdown init
 ```
 
-This will create a scaffolding with default files and directories.
-
-Let's build your site:
-
-```bash
-./build.py
-```
-
-You should see a `site` directory created in the current directory. The `site` directory will contain the generated files. Poke around in there.
-
-You can serve the site by running:
-
-```bash
-python -c"import markupdown; markupdown.serve()"
-```
-
-If you have a directory structure like this:
+This will create a scaffolding with files and directories like this:
 
 ```text
 .
@@ -94,31 +78,21 @@ If you have a directory structure like this:
 │       ├── post1.md
 │       └── post2.md
 ├── templates
-│   ├── index.liquid
-│   └── layout.liquid
+│   ├── _footer_.liquid
+│   ├── _head_.liquid
+│   ├── _header_.liquid
+│   ├── _pages_.liquid
+│   └── default.liquid
+├── .gitignore
 └── build.py
 ```
 
-Run `./build.py` will generate a `site` directory like this:
+Run `./build.py` to generate your site. The output will be in the `site` directory.
 
-```text
-.
-├── css
-│   └── style.css
-├── img
-│   └── image.png
-└── site
-    ├── index.html
-    ├── index.md
-    └── posts
-        ├── index.html
-        ├── index.md
-        ├── post1.html
-        ├── post1.md
-        ├── post2.html
-        └── post2.md
+Markupdown comes with a server you can start with:
+
+```bash
+python -m markupdown serve
 ```
 
-You can also call `serve(site)` at the end of `build.py` to start a local HTTP server.
-
-Most of these methods take additional arguments. Go read the docs to see what you can do.
+Open [http://localhost:8000](http://localhost:8000). You should see a (rather ugly) stub site.
