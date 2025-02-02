@@ -137,8 +137,13 @@ def ls(glob_pattern: str, root: Path | None = None) -> tuple[Path, list[Path]]:
 
 def title(glob_pattern: str, ast_pattern: str | None = None) -> None:
     """
-    Update the site.yaml title field based on the first markdown file matching the
-    given glob pattern.
+    Sets titles for markdown files that don't have a `title` field in their frontmatter.
+    Uses the first # h1 as the title if ast_pattern is not provided. If no # h1 is found,
+    the filename is used with the following rules:
+
+    - Replace .md with empty string
+    - Replace - with spaces
+    - Capitalize
 
     Args:
         glob_pattern: The glob pattern of the markdown files to update.
@@ -148,10 +153,11 @@ def title(glob_pattern: str, ast_pattern: str | None = None) -> None:
     ast_pattern = ast_pattern or PAGE_TITLE_AST_PATH
 
     def _title(md_file: MarkdownFile, _: SiteFile) -> None:
-        title = md_file.frontmatter().get("title")
-        if not title and (potential_title := jmespath.search(ast_pattern, md_file.ast())):
+        if potential_title := md_file.frontmatter().get("title"):
             title = potential_title
-        if not title:
+        elif potential_title := jmespath.search(ast_pattern, md_file.ast()):
+            title = potential_title
+        else:
             title = md_file.path.stem.replace("-", " ").capitalize()
         md_file.set_frontmatter({"title": title})
         md_file.save()
