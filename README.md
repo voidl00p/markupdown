@@ -1,8 +1,6 @@
 # Markupdown
 
-Markupdown is a dead-simple static site generator toolkit. Most static site generators do too much; they're complicated. I wanted something dumb to manage my blog.
-
-Markupdown is a collection of commands that help you set up and manage a static site. You write a `build.py` file that calls the commands you want and run it. That's it!
+Markupdown is a dead-simple static site generator toolkit. It comes with a collection of commands to help you manage a static site. You write a `build.py` file that calls the commands you want and run it. That's it!
 
 Here's what a `build.py` file looks like:
 
@@ -27,7 +25,7 @@ nav("site/**/*.md")
 render("site/**/*.md", site={"title": "My Site"})
 ```
 
-## Modules
+## Commands
 
 Markupdown ships with the following commands:
 
@@ -39,6 +37,8 @@ Markupdown ships with the following commands:
 - `render`: Renders the markdown using [liquid](https://shopify.github.io/liquid/) templates
 - `serve`: Starts a local HTTP server to view the site
 - `title`: Updates the `title` field in the markdown frontmatter
+
+I'll probably add more (`rss`, `sitemap`, `minify`, `social`, etc.). It's a work in progress.
 
 ## Philosophy
 
