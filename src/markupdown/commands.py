@@ -88,7 +88,7 @@ def title(glob_pattern: str, ast_pattern: str | None = None) -> None:
 
     Args:
         glob_pattern: The glob pattern of the markdown files to update.
-        ast_pattern: The jsonpath expression to select the title.
+        ast_pattern: The jmespath expression to select the title.
             Defaults to the first # h1.
     """
     ast_pattern = ast_pattern or PAGE_TITLE_AST_PATH

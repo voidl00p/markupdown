@@ -1,6 +1,6 @@
 # Markupdown
 
-Markupdown is a dead-simple static site generator toolkit. It comes with a collection of commands to help you manage a static site. You write a `build.py` file that calls the commands you want and run it. That's it!
+Markupdown is a dead-simple static site generator. You write a `build.py` file that calls Markupdown commands and run it. That's it!
 
 Here's what a `build.py` file looks like:
 
@@ -25,6 +25,14 @@ nav("site/**/*.md")
 render("site/**/*.md", site={"title": "My Site"})
 ```
 
+Commands like `title` and `index` just scan the site directory to create, update, or delete files as needed. `title`, for example, adds a `title` field to each markdown file's [frontmatter](https://jekyllrb.com/docs/front-matter/).
+
+## Installation
+
+```bash
+pip install markupdown
+```
+
 ## Commands
 
 Markupdown ships with the following commands:
@@ -38,7 +46,7 @@ Markupdown ships with the following commands:
 - `serve`: Starts a local HTTP server to view the site
 - `title`: Updates the `title` field in the markdown frontmatter
 
-I'll probably add more (`rss`, `sitemap`, `minify`, `social`, etc.). It's a work in progress.
+I'll probably add more (e.g. `rss`, `sitemap`, `minify`, `social`). It's a work in progress.
 
 ## Philosophy
 
@@ -51,12 +59,6 @@ Markupdown is designed to be pretty dumb. It's just a collection of functions th
 That's it. Stupid simple. Worse is better.
 
 ## Usage
-
-Install it:
-
-```bash
-pip install markupdown
-```
 
 After you install Markupdown, go to an empty directory and initialize it:
 

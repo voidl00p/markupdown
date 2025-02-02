@@ -78,6 +78,16 @@ class MarkdownFile:
         self._post.metadata.pop(key)
 
     def default_title(self, ast_pattern: str | None = None) -> str:
+        """
+        Get the default title for this page.
+
+        Args:
+            ast_pattern: The jmespath expression to select the title.
+                Defaults to the first # h1.
+
+        Returns:
+            The default title
+        """
         ast_pattern = ast_pattern or PAGE_TITLE_AST_PATH
         if title := jmespath.search(ast_pattern, self.ast()):
             return title
