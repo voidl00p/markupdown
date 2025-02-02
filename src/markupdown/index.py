@@ -102,4 +102,3 @@ def index(site: Site) -> None:
         # Write back to the file
         with open(index_path, "w", encoding="utf-8") as f:
             f.write(frontmatter.dumps(index_post))
-

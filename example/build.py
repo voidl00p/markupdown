@@ -9,4 +9,6 @@ cp("js/*.js")
 cp("images/*.[jpg|jpeg|png]")
 cp("*.ico")
 
+# Update markdown frontmatter
 title("site/**/*.md")
+nav("site/**/*.md")

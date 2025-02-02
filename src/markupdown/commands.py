@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-import frontmatter
-from pathlib import Path
-import jmespath
 import shutil
+from pathlib import Path
 from typing import Callable
-import yaml
-import mistune
 
+import frontmatter
+import jmespath
+import mistune
+import yaml
 
 PAGE_TITLE_AST_PATH = "([?type=='heading' && attrs.level==`1`])[0].children[0].raw"
 AST_RENDERER = mistune.create_markdown(renderer=None)
@@ -73,11 +73,24 @@ class MarkdownFile:
     def set_content(self, content: str) -> None:
         self._post.content = content
 
-    def set_frontmatter(self, metadata: dict[str, object]) -> None:
-        self._post.metadata = metadata
-
     def update_frontmatter(self, metadata: dict[str, object]) -> None:
         self._post.metadata.update(metadata)
+
+    def del_frontmatter_key(self, key: str) -> None:
+        self._post.metadata.pop(key)
+
+    def default_title(self, ast_pattern: str | None = None) -> str:
+        ast_pattern = ast_pattern or PAGE_TITLE_AST_PATH
+        if title := jmespath.search(ast_pattern, self.ast()):
+            return title
+        return self.path.stem.replace("-", " ").capitalize()
+
+    def link(self) -> str:
+        link = self.path.with_suffix("")
+        if link.name == "index":
+            link = link.parent
+
+        return str(link)
 
     def save(self) -> None:
         (self.root / self.path).parent.mkdir(parents=True, exist_ok=True)
@@ -89,7 +102,7 @@ class MarkdownFile:
         # Parse frontmatter and content from the source file
         with open(source, "r", encoding="utf-8") as f:
             metadata, content = frontmatter.parse(f.read())
-        
+
         # Inject source if it's not already set
         metadata["source"] = metadata.get("source", str(source.absolute()))
 
@@ -119,12 +132,16 @@ def cp(
         shutil.copy2(src_file, dest_file)
 
 
-def transform(glob_pattern: str, func: Callable[[MarkdownFile, SiteFile], None]) -> None:
+def transform(
+    glob_pattern: str, func: Callable[[MarkdownFile, SiteFile], None]
+) -> None:
     root, paths = ls(glob_pattern)
+    site_root = root / "site"
 
     for path in paths:
         if path.is_file():
-            func(MarkdownFile(root, path), SiteFile(root / "site"))
+            path = path.relative_to(site_root)
+            func(MarkdownFile(site_root, path), SiteFile(site_root))
 
 
 def ls(glob_pattern: str, root: Path | None = None) -> tuple[Path, list[Path]]:
@@ -132,7 +149,7 @@ def ls(glob_pattern: str, root: Path | None = None) -> tuple[Path, list[Path]]:
 
     # list() to snap shot the directory contents so we don't go into a recursive loop.
     # not memory efficient, but it fixes the issue.
-    return root, list(root.rglob(glob_pattern))
+    return root, list(root.glob(glob_pattern))
 
 
 def title(glob_pattern: str, ast_pattern: str | None = None) -> None:
@@ -153,13 +170,64 @@ def title(glob_pattern: str, ast_pattern: str | None = None) -> None:
     ast_pattern = ast_pattern or PAGE_TITLE_AST_PATH
 
     def _title(md_file: MarkdownFile, _: SiteFile) -> None:
-        if potential_title := md_file.frontmatter().get("title"):
-            title = potential_title
-        elif potential_title := jmespath.search(ast_pattern, md_file.ast()):
-            title = potential_title
-        else:
-            title = md_file.path.stem.replace("-", " ").capitalize()
-        md_file.set_frontmatter({"title": title})
-        md_file.save()
+        if not md_file.frontmatter().get("title"):
+            title = md_file.default_title(ast_pattern)
+            md_file.update_frontmatter({"title": title})
+            md_file.save()
 
     transform(glob_pattern, _title)
+
+
+def nav(glob_pattern: str) -> None:
+    """
+    Update site.yaml in the staging directory with a "nav" field containing a list of
+    title/path entries based on the following criteria:
+    - Pages with nav: true in frontmatter
+    - First-level index.md files without nav: false in frontmatter
+    - Root-level non-index.md files without nav: false in frontmatter
+
+    Args:
+        glob_pattern: The glob pattern of the markdown files to update.
+    """
+
+    def _nav(md_file: MarkdownFile, site_file: SiteFile) -> None:
+        frontmatter = md_file.frontmatter()
+        nav_entries = site_file.metadata().get("nav", [])
+        assert isinstance(nav_entries, list)
+
+        # Skip if nav is explicitly set to false
+        if frontmatter.get("nav") is False:
+            return
+
+        # Calculate relative path parts from site directory
+        file_name = md_file.path.name
+
+        # Include if any of these conditions are met:
+        # 1. nav is explicitly set to true
+        # 2. file is index.md in first level of children
+        # 3. file is in root and not index.md
+        if (
+            frontmatter.get("nav") is True
+            or (file_name == "index.md" and len(md_file.path.parts) == 2)
+            or (len(md_file.path.parts) == 1 and file_name != "index.md")
+        ):
+            # Get the title from frontmatter, fallback to filename without extension
+            title = frontmatter.get("title", md_file.default_title())
+
+            # Create new nav entry
+            new_entry = {"title": title, "path": md_file.link()}
+
+            # Remove any existing entries with the same title
+            nav_entries = [entry for entry in nav_entries if entry["title"] != title]
+
+            # Add nav entry
+            nav_entries.append(new_entry)
+
+            # Sort nav entries by title
+            nav_entries.sort(key=lambda x: x["title"])
+
+            # Update site file with new nav entries
+            site_file.update_metadata({"nav": nav_entries})
+            site_file.save()
+
+    transform(glob_pattern, _nav)

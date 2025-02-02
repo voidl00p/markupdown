@@ -89,4 +89,3 @@ def render(site: Site) -> None:
         # Write rendered content to file
         with open(target_file, "w", encoding="utf-8") as f:
             f.write(rendered)
-
