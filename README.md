@@ -10,14 +10,24 @@ Here's what a `build.py` file looks like:
 #!/usr/bin/env python3
 from markupdown import *
 
-# Create a Site object with configuration
-site = Site()
-# Generate index pages for the site
-index(site)
-# Generate navigation links
-nav(site)
+# Copy files to the site directory
+cp("pages/**/*.md")
+cp("css/*.css", "css")
+cp("js/*.js", "js")
+cp("img/*.[jpg|jpeg|png]", "img")
+cp("*.ico")
+
+# Generate title frontmatter from first H1
+transform("pages/**/*.md", title)
+
+# Generate index.md files with `children` frontmatter field
+transform("pages/**/*.md", index)
+
+# Generate nav field in site.yaml
+transform("pages/**/*.md", nav)
+
 # Render the markdown as HTML
-render(site)
+transform("pages/**/*.md", render)
 ```
 
 ## How it works
