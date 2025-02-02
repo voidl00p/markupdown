@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import frontmatter
 from pathlib import Path
+import jsonpath_ng
 import shutil
 from typing import Callable
 import yaml
 import mistune
 
 
+PAGE_TITLE_AST_PATH = "$[?(@.type=='heading' && @.attrs.level==1)][0].children[0].raw"
 AST_RENDERER = mistune.create_markdown(renderer=None)
 
 
@@ -53,6 +55,10 @@ class MarkdownFile:
         self._load()
         self._post.metadata = metadata
 
+    def update_metadata(self, metadata: dict[str, object]) -> None:
+        self._load()
+        self._post.metadata.update(metadata)
+
     def set_site(self, site: dict[str, object]) -> None:
         self._load()
         self._site = site
@@ -87,21 +93,18 @@ class MarkdownFile:
 def cp(
     glob_pattern: str,
     dest_dir: Path | str = "site",
-    strip_leading_dir: bool = False,
 ) -> None:
-    _, paths = ls(glob_pattern)
+    root, paths = ls(glob_pattern)
     dest_dir = Path(dest_dir)
 
     for src_file in paths:
-        dest_file = src_file
-        if strip_leading_dir:
-            dest_file = Path(*dest_file.parts[1:])
+        dest_file = src_file.relative_to(root)
         dest_file = dest_dir / dest_file
         dest_file.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src_file, dest_file)
 
 
-def transform(glob_pattern: str, func: Callable[[MarkdownFile], MarkdownFile]) -> None:
+def transform(glob_pattern: str, func: Callable[[MarkdownFile], None]) -> None:
     root, paths = ls(glob_pattern)
 
     for path in paths:
@@ -115,3 +118,23 @@ def ls(glob_pattern: str, root: Path | None = None) -> tuple[Path, list[Path]]:
     # list() to snap shot the directory contents so we don't go into a recursive loop.
     # not memory efficient, but it fixes the issue.
     return root, list(root.rglob(glob_pattern))
+
+
+def title(glob_pattern: str, ast_pattern: str | None = None) -> None:
+    """
+    Update the site.yaml title field based on the first markdown file matching the
+    given glob pattern.
+
+    Args:
+        glob_pattern: The glob pattern of the markdown files to update.
+        ast_pattern: The jsonpath expression to select the title.
+            Defaults to the first # h1.
+    """
+    jsonpath = jsonpath_ng.parse(ast_pattern or PAGE_TITLE_AST_PATH)
+
+    def _title(f: MarkdownFile) -> None:
+        title = jsonpath.find(f.ast())
+        if title:
+            f.update_metadata({"title": title[0]})
+
+    transform(glob_pattern, _title)
