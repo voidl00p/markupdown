@@ -315,7 +315,7 @@ class LinkRenderer(mistune.HTMLRenderer):
         return super().link(text, url, title)
 
 
-def render(glob_pattern: str, template_dir: str | Path = "templates") -> None:
+def render(glob_pattern: str, site: dict[str, object] = {}, template_dir: str | Path = "templates") -> None:
     """
     Render markdown files to HTML using liquid templates.
 
@@ -326,6 +326,7 @@ def render(glob_pattern: str, template_dir: str | Path = "templates") -> None:
 
     Args:
         glob_pattern: The glob pattern of the markdown files to render.
+        site: Dictionary of site configuration. Defaults to {}.
         template_dir: Directory containing liquid templates. Defaults to "templates".
 
     Raises:
@@ -372,7 +373,7 @@ def render(glob_pattern: str, template_dir: str | Path = "templates") -> None:
         rendered = template.render(
             content=html_content,
             page=frontmatter,
-            site=SiteFile(md_file.root).metadata(),
+            site=site | SiteFile(md_file.root).metadata(),
         )
 
         # Write rendered content to file

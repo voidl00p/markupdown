@@ -8,6 +8,7 @@ cp("css/*.css")
 cp("js/*.js")
 cp("images/*.[jpg|jpeg|png]")
 cp("*.ico")
+cp("site.yaml")
 
 # Update markdown frontmatter
 title("site/**/*.md")
@@ -15,4 +16,4 @@ index("site/**/*.md")
 nav("site/**/*.md")
 
 # Render pages
-render("site/**/*.md")
+render("site/**/*.md", site={"title": "My Site"})
