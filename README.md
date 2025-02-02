@@ -1,8 +1,8 @@
-# markupdown
+# Markupdown
 
-markupdown is a dead-simple static site generator toolkit. Most static site generators do too much; they're complicated. I wanted something dumb to manage my blog.
+Markupdown is a dead-simple static site generator toolkit. Most static site generators do too much; they're complicated. I wanted something dumb to manage my blog.
 
-markupdown is a collection of commands that help you set up and manage a static site. You write a `build.py` file that calls the commands you want and run it. That's it!
+Markupdown is a collection of commands that help you set up and manage a static site. You write a `build.py` file that calls the commands you want and run it. That's it!
 
 Here's what a `build.py` file looks like:
 
@@ -29,7 +29,7 @@ render("site/**/*.md", site={"title": "My Site"})
 
 ## Modules
 
-markupdown ships with the following commands:
+Markupdown ships with the following commands:
 
 - `cp`: Copies files to the site directory
 - `index`: Generates `pages` frontmatter for index.md files
@@ -42,10 +42,11 @@ markupdown ships with the following commands:
 
 ## Philosophy
 
-markupdown does the following:
+Markupdown is designed to be pretty dumb. It's just a collection of functions that help you do three things:
 
-1. Creates a `Site` object and markupdown will create a `site` directory and copy over the CSS, JS, and template files.
-2. Run various functions to create, modify, or delete staged files.
+- Stage your `site` directory with markdown, css, js, images, and so forth (using `cp`)
+- Transform the files in `site` to add metadata or create new files (using `title`, `index`, `nav`, etc.)
+- Render the markdown using liquid templates (using `render`)
 
 That's it. Stupid simple. Worse is better.
 
@@ -57,7 +58,7 @@ Install it:
 pip install markupdown
 ```
 
-After you install markupdown, go to an empty directory and initialize it:
+After you install Markupdown, go to an empty directory and initialize it:
 
 ```bash
 python -m markupdown init
