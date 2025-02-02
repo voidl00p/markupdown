@@ -19,6 +19,14 @@ def cp(
     dest_dir: Path | str = "site",
     relative_to: Path | str = ".",
 ) -> None:
+    """
+    Copy files matching a glob pattern to a destination directory.
+
+    Args:
+        glob_pattern: The glob pattern to match files to copy.
+        dest_dir: The destination directory to copy files to. Defaults to "site".
+        relative_to: The path that the destination structure should be relative to. Defaults to current directory.
+    """
     root, paths = ls(glob_pattern)
     dest_dir = Path(dest_dir)
     relative_to = Path(relative_to)
@@ -34,6 +42,14 @@ def transform(
     glob_pattern: str,
     func: Callable[[MarkdownFile, SiteFile], None],
 ) -> None:
+    """
+    Apply a transformation function to markdown files matching a glob pattern.
+
+    Args:
+        glob_pattern: The glob pattern to match markdown files to transform.
+        func: A callable that takes a MarkdownFile and SiteFile as arguments and applies
+            the desired transformation.
+    """
     root, paths = ls(glob_pattern)
     site_root = root / "site"
 
@@ -44,6 +60,16 @@ def transform(
 
 
 def ls(glob_pattern: str, root: Path | None = None) -> tuple[Path, list[Path]]:
+    """
+    List files matching a glob pattern from a root directory.
+
+    Args:
+        glob_pattern: The glob pattern to match files.
+        root: The root directory to start the search from. Defaults to current directory.
+
+    Returns:
+        A tuple containing (root_path, list_of_matching_paths).
+    """
     root = root or Path.cwd()
 
     # list() to snap shot the directory contents so we don't go into a recursive loop.
@@ -318,6 +344,11 @@ def init(root_path: Path | str = ".") -> None:
 
 
 class CustomHandler(SimpleHTTPRequestHandler):
+    """
+    Custom HTTP request handler for serving the static site during development.
+    Extends SimpleHTTPRequestHandler to serve files from the site directory
+    and properly handle .html extensions for clean URLs.
+    """
     def do_GET(self):
         url_path = Path(self.path.strip("/"))
         file_path = self.directory / url_path
@@ -333,6 +364,12 @@ class CustomHandler(SimpleHTTPRequestHandler):
 
 
 def serve(port: int = 8000):
+    """
+    Start a local development server to preview the generated site.
+
+    Args:
+        port: The port number to run the server on. Defaults to 8000.
+    """
     site_dir = Path.cwd() / "site"
     handler = partial(CustomHandler, directory=str(site_dir))
     server = HTTPServer(("0.0.0.0", port), handler)
