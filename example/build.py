@@ -3,8 +3,10 @@
 from markupdown import *
 
 # Copy files to the site directory
-cp("**/*.md")
+cp("pages/**/*.md", relative_to="pages")
 cp("css/*.css")
 cp("js/*.js")
-cp("img/*.[jpg|jpeg|png]")
+cp("images/*.[jpg|jpeg|png]")
 cp("*.ico")
+
+title("site/**/*.md")

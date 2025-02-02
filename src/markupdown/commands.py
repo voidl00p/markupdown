@@ -2,74 +2,87 @@ from __future__ import annotations
 
 import frontmatter
 from pathlib import Path
-import jsonpath_ng
+import jmespath
 import shutil
 from typing import Callable
 import yaml
 import mistune
 
 
-PAGE_TITLE_AST_PATH = "$[?(@.type=='heading' && @.attrs.level==1)][0].children[0].raw"
+PAGE_TITLE_AST_PATH = "([?type=='heading' && attrs.level==`1`])[0].children[0].raw"
 AST_RENDERER = mistune.create_markdown(renderer=None)
+
+
+class SiteFile:
+    root: Path
+    _site: dict[str, object]
+
+    def __init__(self, root: Path) -> None:
+        self.root = root
+        self._site = {}
+
+        site_path = self.root / "site.yaml"
+        site_path.parent.mkdir(parents=True, exist_ok=True)
+
+        if site_path.is_file():
+            self._site = yaml.safe_load(site_path.read_text(encoding="utf-8"))
+
+    def metadata(self) -> dict[str, object]:
+        return self._site
+
+    def set_metadata(self, metadata: dict[str, object]) -> None:
+        self._site = metadata
+
+    def update_metadata(self, metadata: dict[str, object]) -> None:
+        self._site.update(metadata)
+
+    def save(self) -> None:
+        (self.root / "site.yaml").parent.mkdir(parents=True, exist_ok=True)
+        with open(self.root / "site.yaml", "w", encoding="utf-8") as f:
+            yaml.dump(self._site, f)
 
 
 class MarkdownFile:
     root: Path
     path: Path
     _post: frontmatter.Post
-    _site: dict[str, object]
+    _ast: list[dict[str, object]]
 
     def __init__(self, root: Path, path: Path) -> None:
         self.root = root
         self.path = path
 
-    def _load(self) -> None:
-        if not self._post:
-            with open(self.root / self.path, "r", encoding="utf-8") as f:
-                self._post = frontmatter.load(f)
-        if not self._site:
-            self._site = yaml.safe_load((self.root / "site.yaml").read_text(encoding="utf-8"))
+        # Load frontmatter and content
+        with open(self.root / self.path, "r", encoding="utf-8") as f:
+            self._post = frontmatter.load(f)
+
+        # Load markdown AST
+        ast = AST_RENDERER(self.content())
+        assert isinstance(ast, list)
+        self._ast = ast
 
     def frontmatter(self) -> dict[str, object]:
-        self._load()
         return self._post.metadata
 
-    def site(self) -> dict[str, object]:
-        self._load()
-        return self._site
-
     def content(self) -> str:
-        self._load()
         return self._post.content
 
-    def ast(self) -> dict[str, object]:
-        ast = AST_RENDERER(self.content())
-        assert isinstance(ast, dict)
-        return ast
+    def ast(self) -> list[dict[str, object]]:
+        return self._ast
 
     def set_content(self, content: str) -> None:
-        self._load()
         self._post.content = content
 
-    def set_metadata(self, metadata: dict[str, object]) -> None:
-        self._load()
+    def set_frontmatter(self, metadata: dict[str, object]) -> None:
         self._post.metadata = metadata
 
-    def update_metadata(self, metadata: dict[str, object]) -> None:
-        self._load()
+    def update_frontmatter(self, metadata: dict[str, object]) -> None:
         self._post.metadata.update(metadata)
 
-    def set_site(self, site: dict[str, object]) -> None:
-        self._load()
-        self._site = site
-
     def save(self) -> None:
-        self._load()
         (self.root / self.path).parent.mkdir(parents=True, exist_ok=True)
-        with open(self.root / self.path, "w", encoding="utf-8") as f:
+        with open(self.root / self.path, "wb") as f:
             frontmatter.dump(self._post, f)
-        with open(self.root / "site.yaml", "w", encoding="utf-8") as f:
-            yaml.dump(self._site, f)
 
     @classmethod
     def create(cls, source: Path, root: Path, path: Path) -> MarkdownFile:
@@ -93,23 +106,25 @@ class MarkdownFile:
 def cp(
     glob_pattern: str,
     dest_dir: Path | str = "site",
+    relative_to: Path | str = ".",
 ) -> None:
     root, paths = ls(glob_pattern)
     dest_dir = Path(dest_dir)
+    relative_to = Path(relative_to)
 
     for src_file in paths:
-        dest_file = src_file.relative_to(root)
+        dest_file = src_file.relative_to(root).relative_to(relative_to)
         dest_file = dest_dir / dest_file
         dest_file.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src_file, dest_file)
 
 
-def transform(glob_pattern: str, func: Callable[[MarkdownFile], None]) -> None:
+def transform(glob_pattern: str, func: Callable[[MarkdownFile, SiteFile], None]) -> None:
     root, paths = ls(glob_pattern)
 
     for path in paths:
         if path.is_file():
-            func(MarkdownFile(root, path))
+            func(MarkdownFile(root, path), SiteFile(root / "site"))
 
 
 def ls(glob_pattern: str, root: Path | None = None) -> tuple[Path, list[Path]]:
@@ -130,11 +145,15 @@ def title(glob_pattern: str, ast_pattern: str | None = None) -> None:
         ast_pattern: The jsonpath expression to select the title.
             Defaults to the first # h1.
     """
-    jsonpath = jsonpath_ng.parse(ast_pattern or PAGE_TITLE_AST_PATH)
+    ast_pattern = ast_pattern or PAGE_TITLE_AST_PATH
 
-    def _title(f: MarkdownFile) -> None:
-        title = jsonpath.find(f.ast())
-        if title:
-            f.update_metadata({"title": title[0]})
+    def _title(md_file: MarkdownFile, _: SiteFile) -> None:
+        title = md_file.frontmatter().get("title")
+        if not title and (potential_title := jmespath.search(ast_pattern, md_file.ast())):
+            title = potential_title
+        if not title:
+            title = md_file.path.stem.replace("-", " ").capitalize()
+        md_file.set_frontmatter({"title": title})
+        md_file.save()
 
     transform(glob_pattern, _title)
