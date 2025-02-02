@@ -231,3 +231,50 @@ def nav(glob_pattern: str) -> None:
             site_file.save()
 
     transform(glob_pattern, _nav)
+
+
+def index(glob_pattern: str) -> None:
+    """
+    Add child page links to the frontmatter of index.md files.
+    Each entry will contain title and link for the pages in that directory.
+    Don't include the root index.md file.
+
+    For each index.md file:
+    - Find all sibling .md files (excluding index.md itself)
+    - Find all subdirectories containing an index.md file
+    - Add these as children in the frontmatter
+
+    Args:
+        glob_pattern: The glob pattern of the markdown files to update.
+    """
+
+    def _index(index_file: MarkdownFile, _: SiteFile) -> None:
+        # Only process index.md files
+        if index_file.path.name != "index.md":
+            return
+
+        # Get the directory containing this index.md
+        dir_path = index_file.path.parent
+        root = index_file.root
+
+        children = []
+
+        # Process sibling markdown files (excluding index.md)
+        for sibling in (root / dir_path).glob("*.md"):
+            if sibling.name == "index.md":
+                continue
+            sibling_md = MarkdownFile(root, dir_path / sibling.name)
+            children.append({
+                "title": sibling_md.frontmatter().get("title", sibling_md.default_title()),
+                "path": sibling_md.link()
+            })
+
+        # Sort children by title
+        children.sort(key=lambda x: x["title"])
+
+        # Update frontmatter with children
+        if children:
+            index_file.update_frontmatter({"children": children})
+            index_file.save()
+
+    transform(glob_pattern, _index)

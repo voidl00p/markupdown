@@ -11,4 +11,5 @@ cp("*.ico")
 
 # Update markdown frontmatter
 title("site/**/*.md")
+index("site/**/*.md")
 nav("site/**/*.md")

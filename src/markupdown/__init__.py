@@ -1,5 +1,4 @@
-from .commands import cp, nav, title
-from .index import index
+from .commands import cp, index, nav, title
 from .init import init
 from .render import render
 from .serve import serve
