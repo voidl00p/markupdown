@@ -172,7 +172,7 @@ def title(glob_pattern: str, ast_pattern: str | None = None) -> None:
     ast_pattern = ast_pattern or PAGE_TITLE_AST_PATH
 
     def _title(md_file: MarkdownFile, _: SiteFile) -> None:
-        if not md_file.frontmatter().get("title"):
+        if not "title" in md_file.frontmatter():
             title = md_file.default_title(ast_pattern)
             md_file.update_frontmatter({"title": title})
             md_file.save()
