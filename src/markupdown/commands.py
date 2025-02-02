@@ -181,7 +181,7 @@ def title(glob_pattern: str, ast_pattern: str | None = None) -> None:
 def nav(glob_pattern: str) -> None:
     """
     Update site.yaml in the staging directory with a "nav" field containing a list of
-    title/path entries based on the following criteria:
+    title/link entries based on the following criteria:
     - Pages with nav: true in frontmatter
     - First-level index.md files without nav: false in frontmatter
     - Root-level non-index.md files without nav: false in frontmatter
@@ -215,7 +215,7 @@ def nav(glob_pattern: str) -> None:
             title = frontmatter.get("title", md_file.default_title())
 
             # Create new nav entry
-            new_entry = {"title": title, "path": md_file.link()}
+            new_entry = {"title": title, "link": md_file.link()}
 
             # Remove any existing entries with the same title
             nav_entries = [entry for entry in nav_entries if entry["title"] != title]
@@ -235,14 +235,14 @@ def nav(glob_pattern: str) -> None:
 
 def index(glob_pattern: str) -> None:
     """
-    Add child page links to the frontmatter of index.md files.
-    Each entry will contain title and link for the pages in that directory.
-    Don't include the root index.md file.
+    Add page links to the frontmatter of index.md files for all of its siblings and
+    subdirectories with an index.md. Each entry will contain title and link for the
+    pages in that directory.
 
     For each index.md file:
     - Find all sibling .md files (excluding index.md itself)
     - Find all subdirectories containing an index.md file
-    - Add these as children in the frontmatter
+    - Add links to these pages in a `pages` field in the frontmatter
 
     Args:
         glob_pattern: The glob pattern of the markdown files to update.
@@ -257,24 +257,38 @@ def index(glob_pattern: str) -> None:
         dir_path = index_file.path.parent
         root = index_file.root
 
-        children = []
+        pages = []
 
         # Process sibling markdown files (excluding index.md)
         for sibling in (root / dir_path).glob("*.md"):
             if sibling.name == "index.md":
                 continue
             sibling_md = MarkdownFile(root, dir_path / sibling.name)
-            children.append({
+            pages.append({
                 "title": sibling_md.frontmatter().get("title", sibling_md.default_title()),
-                "path": sibling_md.link()
+                "link": sibling_md.link()
             })
 
-        # Sort children by title
-        children.sort(key=lambda x: x["title"])
+        # Process subdirectories containing index.md
+        for subdir in (root / dir_path).iterdir():
+            if not subdir.is_dir():
+                continue
+            index_path = subdir / "index.md"
+            if not (root / index_path).is_file():
+                continue
+            index_path = index_path.relative_to(root)
+            subdir_md = MarkdownFile(root, index_path)
+            pages.append({
+                "title": subdir_md.frontmatter().get("title", subdir_md.default_title()),
+                "link": subdir_md.link()
+            })
 
-        # Update frontmatter with children
-        if children:
-            index_file.update_frontmatter({"children": children})
+        # Sort pages by title
+        pages.sort(key=lambda x: x["title"])
+
+        # Update frontmatter with pages
+        if pages:
+            index_file.update_frontmatter({"pages": pages})
             index_file.save()
 
     transform(glob_pattern, _index)
