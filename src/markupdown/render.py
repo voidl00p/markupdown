@@ -5,8 +5,6 @@ import frontmatter
 import mistune
 from liquid import Environment, FileSystemLoader
 
-from .site import Site
-
 
 class LinkRenderer(mistune.HTMLRenderer):
     def __init__(self, staging_dir: Path | str, **kwargs) -> None:

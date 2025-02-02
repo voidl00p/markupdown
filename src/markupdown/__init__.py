@@ -2,7 +2,6 @@ from .commands import cp, index, nav, title
 from .init import init
 from .render import render
 from .serve import serve
-from .site import Site
 
 __all__ = [
     "cp",
@@ -12,5 +11,4 @@ __all__ = [
     "nav",
     "render",
     "serve",
-    "Site",
 ]
