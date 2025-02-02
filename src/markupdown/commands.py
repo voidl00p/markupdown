@@ -6,6 +6,9 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from typing import Callable
 from urllib.parse import urlparse
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler, FileSystemEvent
+import time
 
 import mistune
 from liquid import Environment, FileSystemLoader
@@ -339,3 +342,51 @@ def serve(port: int = 8000):
 
     print(f"Serving {site_dir} on http://0.0.0.0:{port}")
     server.serve_forever()
+
+
+class GlobEventHandler(FileSystemEventHandler):
+    def __init__(self, glob_pattern: str, callback: Callable[[Path], None]):
+        self.glob_pattern = glob_pattern
+        self.callback = callback
+        self.root = Path.cwd()
+
+    def on_modified(self, event: FileSystemEvent) -> None:
+        if not event.is_directory:
+            path = Path(str(event.src_path))
+            if path.match(self.glob_pattern):
+                self.callback(path)
+
+    def on_created(self, event: FileSystemEvent) -> None:
+        self.on_modified(event)
+
+    def on_deleted(self, event: FileSystemEvent) -> None:
+        if not event.is_directory:
+            path = Path(str(event.src_path))
+            if path.match(self.glob_pattern):
+                self.callback(path)
+
+
+def watch(
+    glob_pattern: str,
+    callback: Callable[[Path], None],
+    recursive: bool = True,
+) -> None:
+    """
+    Watch files matching a glob pattern and run a callback when they change.
+
+    Args:
+        glob_pattern: The glob pattern to match files against (e.g. "**/*.md")
+        callback: Function to call when a matching file changes. Takes a Path object.
+        recursive: Whether to watch subdirectories. Defaults to True.
+    """
+    event_handler = GlobEventHandler(glob_pattern, callback)
+    observer = Observer()
+    observer.schedule(event_handler, ".", recursive=recursive)
+    observer.start()
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()
