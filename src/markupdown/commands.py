@@ -1,121 +1,16 @@
 from __future__ import annotations
 
 import shutil
+from functools import partial
+from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from typing import Callable
-
-import frontmatter
-import jmespath
-import mistune
-import yaml
-from liquid import Environment, FileSystemLoader
 from urllib.parse import urlparse
 
-PAGE_TITLE_AST_PATH = "([?type=='heading' && attrs.level==`1`])[0].children[0].raw"
-AST_RENDERER = mistune.create_markdown(renderer=None)
+import mistune
+from liquid import Environment, FileSystemLoader
 
-
-class SiteFile:
-    root: Path
-    _site: dict[str, object]
-
-    def __init__(self, root: Path) -> None:
-        self.root = root
-        self._site = {}
-
-        site_path = self.root / "site.yaml"
-        site_path.parent.mkdir(parents=True, exist_ok=True)
-
-        if site_path.is_file():
-            self._site = yaml.safe_load(site_path.read_text(encoding="utf-8"))
-
-    def metadata(self) -> dict[str, object]:
-        return self._site
-
-    def set_metadata(self, metadata: dict[str, object]) -> None:
-        self._site = metadata
-
-    def update_metadata(self, metadata: dict[str, object]) -> None:
-        self._site.update(metadata)
-
-    def save(self) -> None:
-        (self.root / "site.yaml").parent.mkdir(parents=True, exist_ok=True)
-        with open(self.root / "site.yaml", "w", encoding="utf-8") as f:
-            yaml.dump(self._site, f)
-
-
-class MarkdownFile:
-    root: Path
-    path: Path
-    _post: frontmatter.Post
-    _ast: list[dict[str, object]]
-
-    def __init__(self, root: Path, path: Path) -> None:
-        self.root = root
-        self.path = path
-
-        # Load frontmatter and content
-        with open(self.root / self.path, "r", encoding="utf-8") as f:
-            self._post = frontmatter.load(f)
-
-        # Load markdown AST
-        ast = AST_RENDERER(self.content())
-        assert isinstance(ast, list)
-        self._ast = ast
-
-    def frontmatter(self) -> dict[str, object]:
-        return self._post.metadata
-
-    def content(self) -> str:
-        return self._post.content
-
-    def ast(self) -> list[dict[str, object]]:
-        return self._ast
-
-    def set_content(self, content: str) -> None:
-        self._post.content = content
-
-    def update_frontmatter(self, metadata: dict[str, object]) -> None:
-        self._post.metadata.update(metadata)
-
-    def del_frontmatter_key(self, key: str) -> None:
-        self._post.metadata.pop(key)
-
-    def default_title(self, ast_pattern: str | None = None) -> str:
-        ast_pattern = ast_pattern or PAGE_TITLE_AST_PATH
-        if title := jmespath.search(ast_pattern, self.ast()):
-            return title
-        return self.path.stem.replace("-", " ").capitalize()
-
-    def link(self) -> str:
-        link = self.path.with_suffix("")
-        if link.name == "index":
-            link = link.parent
-
-        return str(link)
-
-    def save(self) -> None:
-        (self.root / self.path).parent.mkdir(parents=True, exist_ok=True)
-        with open(self.root / self.path, "wb") as f:
-            frontmatter.dump(self._post, f)
-
-    @classmethod
-    def create(cls, source: Path, root: Path, path: Path) -> MarkdownFile:
-        # Parse frontmatter and content from the source file
-        with open(source, "r", encoding="utf-8") as f:
-            metadata, content = frontmatter.parse(f.read())
-
-        # Inject source if it's not already set
-        metadata["source"] = metadata.get("source", str(source.absolute()))
-
-        # Create parent directories
-        (root / path).parent.mkdir(parents=True, exist_ok=True)
-
-        # Write the file
-        with open(root / path, "w", encoding="utf-8") as f:
-            f.write(frontmatter.dumps(frontmatter.Post(content, metadata=metadata)))
-
-        return cls(root, path)
+from .files import PAGE_TITLE_AST_PATH, MarkdownFile, SiteFile
 
 
 def cp(
@@ -266,10 +161,14 @@ def index(glob_pattern: str) -> None:
             if sibling.name == "index.md":
                 continue
             sibling_md = MarkdownFile(root, dir_path / sibling.name)
-            pages.append({
-                "title": sibling_md.frontmatter().get("title", sibling_md.default_title()),
-                "link": sibling_md.link()
-            })
+            pages.append(
+                {
+                    "title": sibling_md.frontmatter().get(
+                        "title", sibling_md.default_title()
+                    ),
+                    "link": sibling_md.link(),
+                }
+            )
 
         # Process subdirectories containing index.md
         for subdir in (root / dir_path).iterdir():
@@ -280,10 +179,14 @@ def index(glob_pattern: str) -> None:
                 continue
             index_path = index_path.relative_to(root)
             subdir_md = MarkdownFile(root, index_path)
-            pages.append({
-                "title": subdir_md.frontmatter().get("title", subdir_md.default_title()),
-                "link": subdir_md.link()
-            })
+            pages.append(
+                {
+                    "title": subdir_md.frontmatter().get(
+                        "title", subdir_md.default_title()
+                    ),
+                    "link": subdir_md.link(),
+                }
+            )
 
         # Sort pages by title
         pages.sort(key=lambda x: x["title"])
@@ -315,7 +218,11 @@ class LinkRenderer(mistune.HTMLRenderer):
         return super().link(text, url, title)
 
 
-def render(glob_pattern: str, site: dict[str, object] = {}, template_dir: str | Path = "templates") -> None:
+def render(
+    glob_pattern: str,
+    site: dict[str, object] = {},
+    template_dir: str | Path = "templates",
+) -> None:
     """
     Render markdown files to HTML using liquid templates.
 
@@ -381,3 +288,53 @@ def render(glob_pattern: str, site: dict[str, object] = {}, template_dir: str | 
             f.write(rendered)
 
     transform(glob_pattern, _render)
+
+
+def init(root_path: Path | str = ".") -> None:
+    """
+    Initialize a new markupdown project by copying the example directory structure.
+
+    Args:
+        root_path: The target directory where the example should be copied.
+            Defaults to current directory.
+    """
+    # Get the example directory path
+    root_path = Path(root_path)
+
+    # Find the example directory
+    pkg_dir = Path(__file__).absolute().parent
+    while pkg_dir.exists() and not (pkg_dir / "example").is_dir():
+        print(pkg_dir)
+        pkg_dir = pkg_dir.parent
+
+    if not pkg_dir.exists():
+        raise ValueError(f"Example directory not found in path of {pkg_dir}")
+
+    example_dir = pkg_dir / "example"
+
+    # Create root directory if it doesn't exist
+    shutil.copytree(example_dir, root_path, dirs_exist_ok=True)
+
+
+class CustomHandler(SimpleHTTPRequestHandler):
+    def do_GET(self):
+        url_path = Path(self.path.strip("/"))
+        file_path = self.directory / url_path
+
+        if not file_path.exists():
+            # Check if there's an .html file
+            possible_html_path = file_path.with_suffix(".html")
+            if possible_html_path.exists():
+                self.path = str(possible_html_path.relative_to(self.directory))
+                print(f" Serving {self.path}")
+
+        return super().do_GET()
+
+
+def serve(port: int = 8000):
+    site_dir = Path.cwd() / "site"
+    handler = partial(CustomHandler, directory=str(site_dir))
+    server = HTTPServer(("0.0.0.0", port), handler)
+
+    print(f"Serving {site_dir} on http://0.0.0.0:{port}")
+    server.serve_forever()
