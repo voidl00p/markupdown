@@ -1,0 +1,9 @@
+{% if page.pages %}
+<nav>
+    <ul>
+        {% for subpage in page.pages %}
+        <li><a href="{{ subpage.link }}">{{ subpage.title }}</a></li>
+        {% endfor %}
+    </ul>
+</nav>
+{% endif %}
