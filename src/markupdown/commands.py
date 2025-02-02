@@ -30,7 +30,8 @@ def cp(
 
 
 def transform(
-    glob_pattern: str, func: Callable[[MarkdownFile, SiteFile], None]
+    glob_pattern: str,
+    func: Callable[[MarkdownFile, SiteFile], None],
 ) -> None:
     root, paths = ls(glob_pattern)
     site_root = root / "site"
