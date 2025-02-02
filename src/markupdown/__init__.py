@@ -1,6 +1,5 @@
-from .commands import cp, index, nav, title
+from .commands import cp, index, nav, render, title
 from .init import init
-from .render import render
 from .serve import serve
 
 __all__ = [

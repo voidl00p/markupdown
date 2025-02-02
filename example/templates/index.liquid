@@ -1,8 +1,8 @@
-{% if page.children %}
+{% if page.pages %}
 <nav>
     <ul>
-        {% for child in page.children %}
-        <li><a href="{{ child.path }}">{{ child.title }}</a></li>
+        {% for subpage in page.pages %}
+        <li><a href="{{ subpage.link }}">{{ subpage.title }}</a></li>
         {% endfor %}
     </ul>
 </nav>

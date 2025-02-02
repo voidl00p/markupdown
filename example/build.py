@@ -13,3 +13,6 @@ cp("*.ico")
 title("site/**/*.md")
 index("site/**/*.md")
 nav("site/**/*.md")
+
+# Render pages
+render("site/**/*.md")

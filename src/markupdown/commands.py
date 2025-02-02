@@ -8,6 +8,8 @@ import frontmatter
 import jmespath
 import mistune
 import yaml
+from liquid import Environment, FileSystemLoader
+from urllib.parse import urlparse
 
 PAGE_TITLE_AST_PATH = "([?type=='heading' && attrs.level==`1`])[0].children[0].raw"
 AST_RENDERER = mistune.create_markdown(renderer=None)
@@ -292,3 +294,89 @@ def index(glob_pattern: str) -> None:
             index_file.save()
 
     transform(glob_pattern, _index)
+
+
+class LinkRenderer(mistune.HTMLRenderer):
+    def __init__(self, root: Path | str, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.root = Path(root)
+
+    def link(self, text, url, title=None):
+        """
+        If the URL is relative, append ".html" to it.
+        """
+        parsed_url = urlparse(url)
+        if not parsed_url.scheme:
+            url = url.strip(".md")
+            url = url.strip("/")
+            if not (self.root / url).is_dir():
+                url += ".html"
+            url = "/" + url
+        return super().link(text, url, title)
+
+
+def render(glob_pattern: str, template_dir: str | Path = "templates") -> None:
+    """
+    Render markdown files to HTML using liquid templates.
+
+    For each markdown file:
+    - Convert markdown content to HTML
+    - Apply liquid template specified in frontmatter (or default.liquid)
+    - Write rendered HTML to the same location with .html extension
+
+    Args:
+        glob_pattern: The glob pattern of the markdown files to render.
+        template_dir: Directory containing liquid templates. Defaults to "templates".
+
+    Raises:
+        FileNotFoundError: If template directory doesn't exist
+        ValueError: If no template is specified and no default.liquid exists
+    """
+    # Initialize Liquid environment
+    template_dir = Path(template_dir).absolute()
+
+    if not template_dir.is_dir():
+        raise FileNotFoundError(f"Template directory not found: {template_dir}")
+    env = Environment(loader=FileSystemLoader(template_dir))
+
+    def _render(md_file: MarkdownFile, _: SiteFile) -> None:
+        # Create target HTML file path
+        target_file = md_file.root / md_file.path.with_suffix(".html")
+
+        # Convert markdown to HTML
+        format_markdown = mistune.create_markdown(
+            escape=False,
+            plugins=["strikethrough", "footnotes", "table", "speedup"],
+            renderer=LinkRenderer(md_file.root),
+        )
+        html_content = format_markdown(md_file.content())
+
+        # Get template name from frontmatter or use default
+        frontmatter = md_file.frontmatter()
+        if page_template := frontmatter.get("template"):
+            page_template = str(page_template)
+        else:
+            page_template = "default"
+
+        if not page_template.endswith(".liquid"):
+            page_template += ".liquid"
+
+        # Render template with content and frontmatter variables
+        try:
+            template = env.get_template(page_template)
+        except FileNotFoundError as e:
+            raise ValueError(
+                f"Template not found for {template_dir}: {page_template}"
+            ) from e
+
+        rendered = template.render(
+            content=html_content,
+            page=frontmatter,
+            site=SiteFile(md_file.root).metadata(),
+        )
+
+        # Write rendered content to file
+        with open(target_file, "w", encoding="utf-8") as f:
+            f.write(rendered)
+
+    transform(glob_pattern, _render)
