@@ -8,7 +8,6 @@ cp("css/*.css")
 cp("js/*.js")
 cp("images/*.[jpg|jpeg|png]")
 cp("*.ico")
-cp("site.yaml")
 
 # Update markdown frontmatter
 title("site/**/*.md")

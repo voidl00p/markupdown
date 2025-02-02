@@ -6,7 +6,6 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from typing import Callable
 from urllib.parse import urlparse
-import time
 
 import mistune
 from liquid import Environment, FileSystemLoader

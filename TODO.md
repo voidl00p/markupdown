@@ -1,0 +1,9 @@
+- backref: Generates backreference frontmatter
+- changelog: Generates changelog frontmatter
+- lint: Checks all markdown files for syntax, grammar, readability, and style.
+- minify: Minifies CSS, JS, and HTML
+- og: Generates Open Graph frontmatter
+- twitter: Generates Twitter card frontmatter
+- related: Generates related content frontmatter
+- rss: Generates an RSS feed
+- sitemap: Generates a sitemap.xml

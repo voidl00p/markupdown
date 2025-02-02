@@ -1,36 +1,46 @@
 # markupdown
 
-markupdown is a dead-simple static site generator toolkit. Most static site generators do too much; they're complicated. I wanted something dead simple to manage my blog. So I built markupdown.
+markupdown is a dead-simple static site generator toolkit. Most static site generators do too much; they're complicated. I wanted something dumb to manage my blog.
 
-markupdown is simply a collection of modules that transform files (markdown, JS, CSS, HTML, images, and Liquid templates). You write a `build.py` file that calls the modules you want and run it. That's it!
+markupdown is a collection of commands that help you set up and manage a static site. You write a `build.py` file that calls the commands you want and run it. That's it!
 
 Here's what a `build.py` file looks like:
 
 ```python
 #!/usr/bin/env python3
+
 from markupdown import *
 
 # Copy files to the site directory
-cp("pages/**/*.md")
-cp("css/*.css", "css")
-cp("js/*.js", "js")
-cp("img/*.[jpg|jpeg|png]", "img")
+cp("pages/**/*.md", relative_to="pages")
+cp("css/*.css")
+cp("js/*.js")
+cp("images/*.[jpg|jpeg|png]")
 cp("*.ico")
 
-# Generate title frontmatter from first H1
-transform("pages/**/*.md", title)
+# Update markdown frontmatter
+title("site/**/*.md")
+index("site/**/*.md")
+nav("site/**/*.md")
 
-# Generate index.md files with `children` frontmatter field
-transform("pages/**/*.md", index)
-
-# Generate nav field in site.yaml
-transform("pages/**/*.md", nav)
-
-# Render the markdown as HTML
-transform("pages/**/*.md", render)
+# Render pages
+render("site/**/*.md", site={"title": "My Site"})
 ```
 
-## How it works
+## Modules
+
+markupdown ships with the following commands:
+
+- `cp`: Copies files to the site directory
+- `index`: Generates `pages` frontmatter for index.md files
+- `init`: Initializes a new site
+- `ls`: Lists files in the site directory
+- `nav`: Updates `site.yaml` with navigation links
+- `render`: Renders the markdown using [liquid](https://shopify.github.io/liquid/) templates
+- `serve`: Starts a local HTTP server to view the site
+- `title`: Updates the `title` field in the markdown frontmatter
+
+## Philosophy
 
 markupdown does the following:
 
@@ -39,48 +49,13 @@ markupdown does the following:
 
 That's it. Stupid simple. Worse is better.
 
-## Modules
+## Usage
 
-markupdown has the following core modules:
-
-- index: Generates index frontmatter for index.md files
-- init: Initializes a new site
-- nav: Updates site.yaml with navigation links
-- render: Renders the markdown using [liquid](https://shopify.github.io/liquid/) templates.
-- serve: Starts a local HTTP server to view the site
-
-And the following add-on modules:
-
-- backref: Generates backreference frontmatter
-- changelog: Generates changelog frontmatter
-- lint: Checks all markdown files for syntax, grammar, readability, and style.
-- minify: Minifies CSS, JS, and HTML
-- og: Generates Open Graph frontmatter
-- twitter: Generates Twitter card frontmatter
-- related: Generates related content frontmatter
-- rss: Generates an RSS feed
-- sitemap: Generates a sitemap.xml
-
-## Installation
-
-Install everything:
-
-```bash
-pip install markupdown[all]
-```
-
-Just the core:
+Install it:
 
 ```bash
 pip install markupdown
 ```
-
-Or some add-on modules:
-```bash
-pip install markupdown[minify,rss]
-```
-
-## Usage
 
 After you install markupdown, go to an empty directory and initialize it:
 
