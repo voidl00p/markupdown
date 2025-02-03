@@ -46,16 +46,6 @@ Markupdown ships with the following commands:
 
 I'll probably add more (e.g. `rss`, `sitemap`, `minify`, `social`). It's a work in progress.
 
-## Philosophy
-
-Markupdown is designed to be pretty dumb. It's just a collection of functions that help you do three things:
-
-- Stage your `site` directory with markdown, css, js, images, and so forth (using `cp`)
-- Transform the files in `site` to add metadata or create new files (using `title`, `index`, `nav`, etc.)
-- Render the markdown using liquid templates (using `render`)
-
-That's it. Stupid simple. Worse is better.
-
 ## Usage
 
 After you install Markupdown, go to an empty directory and initialize it:
@@ -97,3 +87,13 @@ python -m markupdown serve
 ```
 
 Open [http://localhost:8000](http://localhost:8000). You should see a (rather ugly) stub site.
+
+## Philosophy
+
+Markupdown is designed to be pretty dumb. It's just a collection of functions that help you do three things:
+
+- Stage your `site` directory with markdown, css, js, images, and so forth (using `cp`)
+- Transform the files in `site` to add metadata or create new files (using `title`, `index`, `nav`, etc.)
+- Render the markdown using liquid templates (using `render`)
+
+That's it. Stupid simple. Worse is better.
