@@ -1,8 +1,6 @@
 # Markupdown
 
-Markupdown is a dead-simple static site generator. You write a `build.py` file that calls Markupdown commands and run it. That's it!
-
-Here's what a `build.py` file looks like:
+Markupdown is a dead-simple static site generator. You write a `build.py` file that calls Markupdown commands and run it. Here's what a `build.py` file looks like:
 
 ```python
 #!/usr/bin/env python3
