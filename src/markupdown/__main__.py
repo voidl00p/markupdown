@@ -1,5 +1,6 @@
-from .commands import init, serve
 import sys
+
+from .commands import init, serve
 
 if __name__ == "__main__":
     match sys.argv:

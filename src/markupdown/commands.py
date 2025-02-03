@@ -1,17 +1,17 @@
 from __future__ import annotations
 
 import shutil
+import subprocess
 from functools import partial
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from typing import Callable
 from urllib.parse import urlparse
-import subprocess
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
 
 import mistune
 from liquid import Environment, FileSystemLoader
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
 
 from .files import PAGE_TITLE_AST_PATH, MarkdownFile, SiteFile
 
@@ -351,6 +351,7 @@ class CustomHandler(SimpleHTTPRequestHandler):
     Extends SimpleHTTPRequestHandler to serve files from the site directory
     and properly handle .html extensions for clean URLs.
     """
+
     def do_GET(self):
         url_path = Path(self.path.strip("/"))
         file_path = self.directory / url_path
@@ -375,7 +376,7 @@ class BuildEventHandler(FileSystemEventHandler):
             return
         print(f"Detected change in {event.src_path}, rebuilding...")
         try:
-            subprocess.run(['python', str(self.build_script_path)], check=True)
+            subprocess.run(["python", str(self.build_script_path)], check=True)
         except subprocess.CalledProcessError as e:
             print(f"Error during rebuild: {e}")
 
