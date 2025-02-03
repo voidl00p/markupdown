@@ -56,6 +56,8 @@ python -m markupdown init
 
 This will create a scaffolding with files and directories like this:
 
+<details>
+<summary>Expand to see the scaffolding...</summary>
 ```text
 .
 ├── css
@@ -77,6 +79,7 @@ This will create a scaffolding with files and directories like this:
 ├── .gitignore
 └── build.py
 ```
+</details>
 
 Run `./build.py` to generate your site. The output will be in the `site` directory.
 
