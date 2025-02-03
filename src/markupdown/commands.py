@@ -2,16 +2,14 @@ from __future__ import annotations
 
 import shutil
 import subprocess
-from functools import partial
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+from http.server import SimpleHTTPRequestHandler
 from pathlib import Path
 from typing import Callable
 from urllib.parse import urlparse
 
 import mistune
 from liquid import Environment, FileSystemLoader
-from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
+from livereload import Server
 
 from .files import PAGE_TITLE_AST_PATH, MarkdownFile, SiteFile
 
@@ -366,19 +364,9 @@ class CustomHandler(SimpleHTTPRequestHandler):
         return super().do_GET()
 
 
-class BuildEventHandler(FileSystemEventHandler):
-    def __init__(self, build_script_path):
-        self.build_script_path = build_script_path
-        super().__init__()
-
-    def on_any_event(self, event):
-        if event.is_directory:
-            return
-        print(f"Detected change in {event.src_path}, rebuilding...")
-        try:
-            subprocess.run(["python", str(self.build_script_path)], check=True)
-        except subprocess.CalledProcessError as e:
-            print(f"Error during rebuild: {e}")
+class MarkupdownServer(Server):
+    def make_handler_class(self):
+        return CustomHandler
 
 
 def serve(port: int = 8000, watch_dir: Path | str = "pages"):
@@ -395,25 +383,25 @@ def serve(port: int = 8000, watch_dir: Path | str = "pages"):
     build_script = Path.cwd() / "build.py"
 
     if not build_script.exists():
-        print(f"Warning: build.py not found in {watch_dir}")
+        print(f"Warning: build.py not found in {Path.cwd()}")
         return
 
-    # Set up file system watcher
-    event_handler = BuildEventHandler(build_script)
-    observer = Observer()
-    observer.schedule(event_handler, str(watch_dir), recursive=True)
-    observer.start()
+    def rebuild():
+        try:
+            subprocess.run(["python", str(build_script)], check=True)
+            return True
+        except subprocess.CalledProcessError as e:
+            print(f"Error during rebuild: {e}")
+            return False
 
-    # Set up HTTP server
-    handler = partial(CustomHandler, directory=str(site_dir))
-    server = HTTPServer(("0.0.0.0", port), handler)
+    # Initial build
+    rebuild()
 
-    try:
-        print(f"Serving {site_dir} on http://0.0.0.0:{port}")
-        print(f"Watching '{watch_dir}' for changes...")
-        server.serve_forever()
-    except KeyboardInterrupt:
-        print("\nStopping server and file watcher...")
-        observer.stop()
-        server.shutdown()
-    observer.join()
+    # Create livereload server
+    server = MarkupdownServer()
+
+    # Watch the directory for changes and run build script
+    server.watch(str(watch_dir), rebuild)
+
+    # Serve the site directory
+    server.serve(port=port, root=str(site_dir))
