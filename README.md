@@ -25,12 +25,6 @@ render("site/**/*.md", site={"title": "My Site"})
 
 Commands like `title` and `index` just scan the site directory to create, update, or delete files as needed. `title`, for example, adds a `title` field to each markdown file's [frontmatter](https://jekyllrb.com/docs/front-matter/).
 
-## Installation
-
-```bash
-pip install markupdown
-```
-
 ## Commands
 
 Markupdown ships with the following commands:
@@ -45,6 +39,12 @@ Markupdown ships with the following commands:
 - `title`: Updates the `title` field in the markdown frontmatter
 
 I'll probably add more (e.g. `rss`, `sitemap`, `minify`, `social`). It's a work in progress.
+
+## Installation
+
+```bash
+pip install markupdown
+```
 
 ## Usage
 
