@@ -6,6 +6,9 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from typing import Callable
 from urllib.parse import urlparse
+import subprocess
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 import mistune
 from liquid import Environment, FileSystemLoader
@@ -362,16 +365,54 @@ class CustomHandler(SimpleHTTPRequestHandler):
         return super().do_GET()
 
 
-def serve(port: int = 8000):
+class BuildEventHandler(FileSystemEventHandler):
+    def __init__(self, build_script_path):
+        self.build_script_path = build_script_path
+        super().__init__()
+
+    def on_any_event(self, event):
+        if event.is_directory:
+            return
+        print(f"Detected change in {event.src_path}, rebuilding...")
+        try:
+            subprocess.run(['python', str(self.build_script_path)], check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"Error during rebuild: {e}")
+
+
+def serve(port: int = 8000, watch_dir: Path | str = "pages"):
     """
     Start a local development server to preview the generated site.
+    Uses the build.py script to rebuild the site when changes are detected.
 
     Args:
         port: The port number to run the server on. Defaults to 8000.
+        watch_dir: Directory to watch for changes. Defaults to current directory.
     """
     site_dir = Path.cwd() / "site"
+    watch_dir = Path(watch_dir)
+    build_script = Path.cwd() / "build.py"
+
+    if not build_script.exists():
+        print(f"Warning: build.py not found in {watch_dir}")
+        return
+
+    # Set up file system watcher
+    event_handler = BuildEventHandler(build_script)
+    observer = Observer()
+    observer.schedule(event_handler, str(watch_dir), recursive=True)
+    observer.start()
+
+    # Set up HTTP server
     handler = partial(CustomHandler, directory=str(site_dir))
     server = HTTPServer(("0.0.0.0", port), handler)
 
-    print(f"Serving {site_dir} on http://0.0.0.0:{port}")
-    server.serve_forever()
+    try:
+        print(f"Serving {site_dir} on http://0.0.0.0:{port}")
+        print(f"Watching '{watch_dir}' for changes...")
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\nStopping server and file watcher...")
+        observer.stop()
+        server.shutdown()
+    observer.join()
